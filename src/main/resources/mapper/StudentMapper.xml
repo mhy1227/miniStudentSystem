@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.czj.student.mapper.StudentMapper">
+    
+    <!-- 结果映射 -->
+    <resultMap id="BaseResultMap" type="com.czj.student.entity.Student">
+        <id column="id" property="id"/>
+        <result column="student_no" property="studentNo"/>
+        <result column="name" property="name"/>
+        <result column="sfzh" property="sfzh"/>
+        <result column="gender" property="gender"/>
+        <result column="major" property="major"/>
+        <result column="remark" property="remark"/>
+        <result column="created_time" property="createdTime"/>
+        <result column="updated_time" property="updatedTime"/>
+    </resultMap>
+
+    <!-- 通用查询列 -->
+    <sql id="Base_Column_List">
+        id, student_no, name, sfzh, gender, major, remark, created_time, updated_time
+    </sql>
+
+    <!-- 插入学生信息 -->
+    <insert id="insert" parameterType="com.czj.student.entity.Student" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO student (
+            student_no, name, sfzh, gender, major, remark
+        ) VALUES (
+            #{studentNo}, #{name}, #{sfzh}, #{gender}, #{major}, #{remark}
+        )
+    </insert>
+
+    <!-- 根据ID删除学生 -->
+    <delete id="deleteById">
+        DELETE FROM student WHERE id = #{id}
+    </delete>
+
+    <!-- 更新学生信息 -->
+    <update id="update" parameterType="com.czj.student.entity.Student">
+        UPDATE student
+        <set>
+            <if test="studentNo != null">student_no = #{studentNo},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="sfzh != null">sfzh = #{sfzh},</if>
+            <if test="gender != null">gender = #{gender},</if>
+            <if test="major != null">major = #{major},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 根据ID查询学生 -->
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM student
+        WHERE id = #{id}
+    </select>
+
+    <!-- 根据学号查询学生 -->
+    <select id="selectByStudentNo" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM student
+        WHERE student_no = #{studentNo}
+    </select>
+
+    <!-- 查询学生列表 -->
+    <select id="selectList" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM student
+        <where>
+            <if test="studentNo != null and studentNo != ''">
+                AND student_no LIKE CONCAT('%', #{studentNo}, '%')
+            </if>
+            <if test="name != null and name != ''">
+                AND name LIKE CONCAT('%', #{name}, '%')
+            </if>
+            <if test="sfzh != null and sfzh != ''">
+                AND sfzh = #{sfzh}
+            </if>
+            <if test="gender != null and gender != ''">
+                AND gender = #{gender}
+            </if>
+            <if test="major != null and major != ''">
+                AND major LIKE CONCAT('%', #{major}, '%')
+            </if>
+        </where>
+        ORDER BY created_time DESC
+    </select>
+
+    <!-- 查询总记录数 -->
+    <select id="selectCount" resultType="long">
+        SELECT COUNT(*)
+        FROM student
+        <where>
+            <if test="studentNo != null and studentNo != ''">
+                AND student_no LIKE CONCAT('%', #{studentNo}, '%')
+            </if>
+            <if test="name != null and name != ''">
+                AND name LIKE CONCAT('%', #{name}, '%')
+            </if>
+            <if test="sfzh != null and sfzh != ''">
+                AND sfzh = #{sfzh}
+            </if>
+            <if test="gender != null and gender != ''">
+                AND gender = #{gender}
+            </if>
+            <if test="major != null and major != ''">
+                AND major LIKE CONCAT('%', #{major}, '%')
+            </if>
+        </where>
+    </select>
+</mapper>
