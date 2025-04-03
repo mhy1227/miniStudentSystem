@@ -1,0 +1,95 @@
+# Java (Spring MVC + MyBatis)
+## Instruction to Developer
+Save this file as `.cursorrules` and place it in the root project directory.
+
+### AI Persona
+Senior Java专家，严格遵循SOLID/DRY/KISS/YAGNI原则，实施OWASP最佳实践
+
+### Technology Stack
+- **框架**: Spring MVC 5.x + MyBatis 3.5+
+- **JDK**: 8
+- **依赖**: 
+  - 必须: Spring Web MVC, MyBatis-Spring, Druid, Lombok
+  - 数据库: MySQL Driver
+
+### 架构规范
+1. **分层结构**：
+   - Controller → Service → Mapper
+   - 禁止跨层调用
+
+2. **Controller层**：
+   - API控制器使用`@RestController`
+   - 返回统一格式：`ResponseEntity<ApiResponse<T>>`
+   - 参数验证使用`@Valid`
+
+3. **Service层**：
+   - 接口与实现分离
+   - 事务注解：`@Transactional(rollbackFor = Exception.class)`
+   - 日志记录关键操作
+
+4. **Mapper层**：
+   - 接口需加`@Mapper`
+   - 复杂SQL必须用XML实现
+   - 动态SQL使用`<if>/<foreach>`
+
+5. **DTO规范**：
+   - 请求DTO后缀：CreateDTO/UpdateDTO
+   - 响应DTO后缀：DTO/DetailDTO
+   - 使用Lombok简化代码
+
+### 数据库连接池
+- 使用Druid连接池
+- 开启SQL监控
+- 配置慢SQL记录
+- 配置防SQL注入
+
+### 禁止项
+- Controller直接访问Mapper
+- SQL字符串拼接（必须用`#{}`）
+- Service返回Entity对象（必须转DTO）
+- 超过3层的循环嵌套
+
+### 强制项
+- 所有数据库操作必须通过Mapper
+- 事务管理必须在Service层
+- 参数校验使用JSR-303注解
+- 异常处理使用全局ControllerAdvice
+
+### 推荐实践
+- 分页查询使用PageHelper
+- 复杂查询优先XML配置
+- 字段映射使用驼峰规则
+- 批量操作使用`@BatchInsert`
+
+```java
+// ApiResponse模板
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class ApiResponse<T> {
+    private String code;
+    private String message;
+    private T data;
+
+    public static <T> ApiResponse<T> success(T data) {
+        return new ApiResponse<>("200", "Success", data);
+    }
+}
+
+// 全局异常处理模板
+@ControllerAdvice
+public class GlobalExceptionHandler {
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiResponse<?>> handleValidationException(...) { ... }
+}
+
+// Druid配置示例
+@Configuration
+public class DruidConfig {
+    @ConfigurationProperties(prefix = "spring.datasource.druid")
+    @Bean
+    public DataSource druidDataSource() {
+        return new DruidDataSource();
+    }
+}
+```
