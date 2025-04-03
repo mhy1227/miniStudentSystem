@@ -12,12 +12,15 @@
         <setting name="useColumnLabel" value="true"/>
         <!-- 开启二级缓存 -->
         <setting name="cacheEnabled" value="true"/>
+        <!-- 打印SQL语句 -->
+        <setting name="logImpl" value="SLF4J"/>
     </settings>
 
     <!-- 分页插件 -->
     <!-- <plugins>
         <plugin interceptor="com.github.pagehelper.PageInterceptor">
             <property name="helperDialect" value="mysql"/>
+            <property name="reasonable" value="true"/>
         </plugin>
     </plugins> -->
 </configuration>
