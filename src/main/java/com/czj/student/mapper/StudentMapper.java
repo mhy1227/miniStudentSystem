@@ -43,10 +43,10 @@ public interface StudentMapper {
     /**
      * 根据学号查询学生
      *
-     * @param studentNo 学号
+     * @param sno 学号
      * @return 学生信息
      */
-    Student selectByStudentNo(@Param("studentNo") String studentNo);
+    Student selectByStudentNo(@Param("sno") String sno);
 
     /**
      * 查询学生列表

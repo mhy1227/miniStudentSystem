@@ -16,7 +16,7 @@ public class Student {
     /**
      * 学号
      */
-    private String studentNo;
+    private String sno;
 
     /**
      * 姓名

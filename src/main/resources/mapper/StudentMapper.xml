@@ -5,7 +5,7 @@
     <!-- 结果映射 -->
     <resultMap id="BaseResultMap" type="com.czj.student.entity.Student">
         <id column="sid" property="sid"/>
-        <result column="student_no" property="studentNo"/>
+        <result column="sno" property="sno"/>
         <result column="name" property="name"/>
         <result column="sfzh" property="sfzh"/>
         <result column="gender" property="gender"/>
@@ -17,15 +17,15 @@
 
     <!-- 通用查询列 -->
     <sql id="Base_Column_List">
-        sid, student_no, name, sfzh, gender, major, remark, created_time, updated_time
+        sid, sno, name, sfzh, gender, major, remark, created_time, updated_time
     </sql>
 
     <!-- 插入学生信息 -->
     <insert id="insert" parameterType="com.czj.student.entity.Student" useGeneratedKeys="true" keyProperty="sid">
         INSERT INTO student (
-            student_no, name, sfzh, gender, major, remark
+            sno, name, sfzh, gender, major, remark
         ) VALUES (
-            #{studentNo}, #{name}, #{sfzh}, #{gender}, #{major}, #{remark}
+            #{sno}, #{name}, #{sfzh}, #{gender}, #{major}, #{remark}
         )
     </insert>
 
@@ -38,7 +38,7 @@
     <update id="update" parameterType="com.czj.student.entity.Student">
         UPDATE student
         <set>
-            <if test="studentNo != null">student_no = #{studentNo},</if>
+            <if test="sno != null">sno = #{sno},</if>
             <if test="name != null">name = #{name},</if>
             <if test="sfzh != null">sfzh = #{sfzh},</if>
             <if test="gender != null">gender = #{gender},</if>
@@ -59,7 +59,7 @@
     <select id="selectByStudentNo" resultMap="BaseResultMap">
         SELECT <include refid="Base_Column_List"/>
         FROM student
-        WHERE student_no = #{studentNo}
+        WHERE sno = #{sno}
     </select>
 
     <!-- 查询学生列表 -->
@@ -67,8 +67,8 @@
         SELECT <include refid="Base_Column_List"/>
         FROM student
         <where>
-            <if test="studentNo != null and studentNo != ''">
-                AND student_no LIKE CONCAT('%', #{studentNo}, '%')
+            <if test="sno != null and sno != ''">
+                AND sno LIKE CONCAT('%', #{sno}, '%')
             </if>
             <if test="name != null and name != ''">
                 AND name LIKE CONCAT('%', #{name}, '%')
@@ -91,8 +91,8 @@
         SELECT COUNT(*)
         FROM student
         <where>
-            <if test="studentNo != null and studentNo != ''">
-                AND student_no LIKE CONCAT('%', #{studentNo}, '%')
+            <if test="sno != null and sno != ''">
+                AND sno LIKE CONCAT('%', #{sno}, '%')
             </if>
             <if test="name != null and name != ''">
                 AND name LIKE CONCAT('%', #{name}, '%')

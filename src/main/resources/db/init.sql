@@ -6,24 +6,29 @@ USE mini_student_db;
 -- 学生表
 CREATE TABLE IF NOT EXISTS student (
     sid BIGINT PRIMARY KEY AUTO_INCREMENT,
-    student_no VARCHAR(20) NOT NULL UNIQUE COMMENT '学号',
-    name VARCHAR(50) NOT NULL COMMENT '姓名',
-    sfzh VARCHAR(18) NOT NULL UNIQUE COMMENT '身份证号',
+    sno VARCHAR(10) NOT NULL COMMENT '学号（XH前缀+6位数字）',
+    name VARCHAR(30) NOT NULL COMMENT '姓名',
+    sfzh CHAR(18) NOT NULL COMMENT '身份证号',
     gender CHAR(1) NOT NULL COMMENT '性别：M-男，F-女',
-    major VARCHAR(50) NOT NULL COMMENT '专业',
+    major VARCHAR(30) NOT NULL COMMENT '专业',
     remark VARCHAR(500) COMMENT '其他说明',
     created_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    updated_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
+    updated_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    UNIQUE KEY uk_sno (sno),
+    UNIQUE KEY uk_sfzh (sfzh),
+    KEY idx_name (name)
 ) COMMENT '学生信息表';
 
 -- 课程表
 CREATE TABLE IF NOT EXISTS course (
     cid BIGINT PRIMARY KEY AUTO_INCREMENT,
-    course_no VARCHAR(20) NOT NULL UNIQUE COMMENT '课程编号',
-    name VARCHAR(100) NOT NULL COMMENT '课程名称',
+    course_no VARCHAR(10) NOT NULL COMMENT '课程编号',
+    name VARCHAR(50) NOT NULL COMMENT '课程名称',
     credit DECIMAL(2,1) NOT NULL COMMENT '学分',
     created_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    updated_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间'
+    updated_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    UNIQUE KEY uk_course_no (course_no),
+    CONSTRAINT chk_credit CHECK (credit >= 0 AND credit <= 10)
 ) COMMENT '课程信息表';
 
 -- 选课及成绩表
@@ -44,7 +49,15 @@ CREATE TABLE IF NOT EXISTS student_course (
     updated_time DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (student_sid, course_cid, semester),
     FOREIGN KEY (student_sid) REFERENCES student(sid),
-    FOREIGN KEY (course_cid) REFERENCES course(cid)
+    FOREIGN KEY (course_cid) REFERENCES course(cid),
+    KEY idx_semester (semester),
+    KEY idx_status (status),
+    KEY idx_selection_date (selection_date),
+    KEY idx_final_score (final_score),
+    CONSTRAINT chk_status CHECK (status IN (1,2,3,4)),
+    CONSTRAINT chk_regular_score CHECK (regular_score IS NULL OR (regular_score >= 0 AND regular_score <= 100)),
+    CONSTRAINT chk_exam_score CHECK (exam_score IS NULL OR (exam_score >= 0 AND exam_score <= 100)),
+    CONSTRAINT chk_final_score CHECK (final_score IS NULL OR (final_score >= 0 AND final_score <= 100))
 ) COMMENT '选课及成绩信息表';
 
 -- 创建索引
@@ -53,17 +66,17 @@ CREATE INDEX idx_student_course_selection_date ON student_course(selection_date)
 CREATE INDEX idx_student_course_final_score ON student_course(final_score);
 
 -- 添加测试数据
-INSERT INTO student (student_no, name, sfzh, gender, major, remark) VALUES
-('2021001', '张三', '320123200001015678', 'M', '计算机科学与技术', '转专业学生'),
-('2021002', '李四', '320123200002025678', 'M', '软件工程', NULL),
-('2021003', '王五', '320123200003035678', 'F', '人工智能', '特长生'),
-('2021004', '赵六', '320123200004045678', 'M', '计算机科学与技术', NULL),
-('2021005', '钱七', '320123200005055678', 'F', '软件工程', '学生会干部'),
-('2021006', '孙八', '320123200006065678', 'M', '人工智能', NULL),
-('2021007', '周九', '320123200007075678', 'F', '计算机科学与技术', '班长'),
-('2021008', '吴十', '320123200008085678', 'M', '软件工程', NULL),
-('2021009', '郑十一', '320123200009095678', 'F', '人工智能', '竞赛获奖'),
-('2021010', '王十二', '320123200010105678', 'M', '计算机科学与技术', NULL);
+INSERT INTO student (sno, name, sfzh, gender, major, remark) VALUES
+('XH000001', '张三', '320123200001015678', 'M', '计算机科学与技术', '转专业学生'),
+('XH000002', '李四', '320123200002025678', 'M', '软件工程', NULL),
+('XH000003', '王五', '320123200003035678', 'F', '人工智能', '特长生'),
+('XH000004', '赵六', '320123200004045678', 'M', '计算机科学与技术', NULL),
+('XH000005', '钱七', '320123200005055678', 'F', '软件工程', '学生会干部'),
+('XH000006', '孙八', '320123200006065678', 'M', '人工智能', NULL),
+('XH000007', '周九', '320123200007075678', 'F', '计算机科学与技术', '班长'),
+('XH000008', '吴十', '320123200008085678', 'M', '软件工程', NULL),
+('XH000009', '郑十一', '320123200009095678', 'F', '人工智能', '竞赛获奖'),
+('XH000010', '王十二', '320123200010105678', 'M', '计算机科学与技术', NULL);
 
 INSERT INTO course (course_no, name, credit) VALUES
 ('C001', '高等数学', 4.0),
