@@ -11,7 +11,7 @@ public class Student {
     /**
      * 学生ID
      */
-    private Long id;
+    private Long sid;
 
     /**
      * 学号

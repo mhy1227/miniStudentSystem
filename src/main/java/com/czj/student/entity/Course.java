@@ -12,7 +12,7 @@ public class Course {
     /**
      * 课程ID
      */
-    private Long id;
+    private Long cid;
 
     /**
      * 课程编号

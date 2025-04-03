@@ -4,7 +4,7 @@
     
     <!-- 结果映射 -->
     <resultMap id="BaseResultMap" type="com.czj.student.entity.Student">
-        <id column="id" property="id"/>
+        <id column="sid" property="sid"/>
         <result column="student_no" property="studentNo"/>
         <result column="name" property="name"/>
         <result column="sfzh" property="sfzh"/>
@@ -17,11 +17,11 @@
 
     <!-- 通用查询列 -->
     <sql id="Base_Column_List">
-        id, student_no, name, sfzh, gender, major, remark, created_time, updated_time
+        sid, student_no, name, sfzh, gender, major, remark, created_time, updated_time
     </sql>
 
     <!-- 插入学生信息 -->
-    <insert id="insert" parameterType="com.czj.student.entity.Student" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insert" parameterType="com.czj.student.entity.Student" useGeneratedKeys="true" keyProperty="sid">
         INSERT INTO student (
             student_no, name, sfzh, gender, major, remark
         ) VALUES (
@@ -31,7 +31,7 @@
 
     <!-- 根据ID删除学生 -->
     <delete id="deleteById">
-        DELETE FROM student WHERE id = #{id}
+        DELETE FROM student WHERE sid = #{sid}
     </delete>
 
     <!-- 更新学生信息 -->
@@ -45,14 +45,14 @@
             <if test="major != null">major = #{major},</if>
             <if test="remark != null">remark = #{remark},</if>
         </set>
-        WHERE id = #{id}
+        WHERE sid = #{sid}
     </update>
 
     <!-- 根据ID查询学生 -->
     <select id="selectById" resultMap="BaseResultMap">
         SELECT <include refid="Base_Column_List"/>
         FROM student
-        WHERE id = #{id}
+        WHERE sid = #{sid}
     </select>
 
     <!-- 根据学号查询学生 -->

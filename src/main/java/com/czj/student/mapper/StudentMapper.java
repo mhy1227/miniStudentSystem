@@ -19,10 +19,10 @@ public interface StudentMapper {
     /**
      * 根据ID删除学生
      *
-     * @param id 学生ID
+     * @param sid 学生ID
      * @return 影响行数
      */
-    int deleteById(@Param("id") Long id);
+    int deleteById(@Param("sid") Long sid);
 
     /**
      * 更新学生信息
@@ -35,10 +35,10 @@ public interface StudentMapper {
     /**
      * 根据ID查询学生
      *
-     * @param id 学生ID
+     * @param sid 学生ID
      * @return 学生信息
      */
-    Student selectById(@Param("id") Long id);
+    Student selectById(@Param("sid") Long sid);
 
     /**
      * 根据学号查询学生
