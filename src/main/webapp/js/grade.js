@@ -4,20 +4,17 @@ let currentCourse = null;
 
 // 显示加载状态
 function showLoading() {
-    const loadingDiv = document.createElement('div');
-    loadingDiv.className = 'loading-indicator';
-    loadingDiv.innerHTML = `
-        <div class="spinner"></div>
-        <span>加载中...</span>
-    `;
-    document.body.appendChild(loadingDiv);
+    const loadingDiv = document.getElementById('loadingIndicator');
+    if (loadingDiv) {
+        loadingDiv.style.display = 'block';
+    }
 }
 
 // 隐藏加载状态
 function hideLoading() {
-    const loadingDiv = document.querySelector('.loading-indicator');
+    const loadingDiv = document.getElementById('loadingIndicator');
     if (loadingDiv) {
-        loadingDiv.remove();
+        loadingDiv.style.display = 'none';
     }
 }
 
@@ -31,47 +28,38 @@ function setDefaultSemester() {
     const now = new Date();
     const year = now.getFullYear();
     const month = now.getMonth() + 1;
-    let semester;
+    const semester = month >= 8 ? '1' : '2';
+    const academicYear = month >= 8 ? `${year}-${year+1}` : `${year-1}-${year}`;
+    const defaultSemester = `${academicYear}-${semester}`;
     
-    if (month >= 9) {
-        // 第一学期 (9月-次年2月)
-        semester = year + "-" + (year + 1) + "-1";
-    } else if (month >= 3) {
-        // 第二学期 (3月-8月)
-        semester = (year - 1) + "-" + year + "-2";
-    } else {
-        // 上一年第一学期
-        semester = (year - 1) + "-" + year + "-1";
-    }
-    
-    document.getElementById("semester").value = semester;
+    document.getElementById('semester').value = defaultSemester;
 }
 
-// 查找学生
+// 查询学生信息
 async function searchStudent() {
-    const studentId = document.getElementById("studentId").value;
+    const studentId = document.getElementById('studentId').value.trim();
     if (!studentId) {
-        alert("请输入学号");
+        alert('请输入学号');
         return;
     }
 
     showLoading();
     try {
-        const response = await fetch(`/api/students/${studentId}`);
+        const response = await fetch(`/api/students/no/${studentId}`);
         const result = await response.json();
         
-        if (result.code === 0 && result.data) {
+        if (result.code === 200 && result.data) {
             currentStudent = result.data;
-            document.getElementById("studentName").textContent = currentStudent.name;
-            loadStudentGrades();
+            document.getElementById('studentName').textContent = currentStudent.name;
+            loadGrades();
         } else {
-            alert("未找到该学生");
-            document.getElementById("studentName").textContent = "";
+            alert('未找到该学生');
+            document.getElementById('studentName').textContent = '';
             currentStudent = null;
         }
     } catch (error) {
-        console.error("查询学生失败:", error);
-        alert("查询学生失败");
+        console.error('查询学生失败:', error);
+        alert('查询学生失败');
     } finally {
         hideLoading();
     }
@@ -87,10 +75,10 @@ async function searchCourse() {
 
     showLoading();
     try {
-        const response = await fetch(`/api/courses/${courseId}`);
+        const response = await fetch(`/api/courses/no/${courseId}`);
         const result = await response.json();
         
-        if (result.code === 0 && result.data) {
+        if (result.code === 200 && result.data) {
             currentCourse = result.data;
             document.getElementById("courseName").textContent = currentCourse.name;
             loadCourseGrades();
@@ -126,7 +114,7 @@ async function updateRegularScore() {
         });
         const result = await response.json();
         
-        if (result.code === 0) {
+        if (result.code === 200) {
             alert("平时成绩录入成功");
             loadGrades();
         } else {
@@ -159,7 +147,7 @@ async function updateExamScore() {
         });
         const result = await response.json();
         
-        if (result.code === 0) {
+        if (result.code === 200) {
             alert("考试成绩录入成功");
             loadGrades();
         } else {
@@ -183,7 +171,7 @@ async function loadStudentGrades() {
         const response = await fetch(`/api/student-courses/grades/student/${currentStudent.sid}?semester=${semester}`);
         const result = await response.json();
         
-        if (result.code === 0) {
+        if (result.code === 200) {
             displayGrades(result.data);
             document.getElementById("gradeStats").style.display = "none";
         } else {
@@ -207,7 +195,7 @@ async function loadCourseGrades() {
         const response = await fetch(`/api/student-courses/grades/course/${currentCourse.cid}?semester=${semester}`);
         const result = await response.json();
         
-        if (result.code === 0) {
+        if (result.code === 200) {
             displayGrades(result.data);
             loadCourseStats();
         } else {
@@ -230,7 +218,7 @@ async function loadCourseStats() {
         const response = await fetch(`/api/student-courses/grades/stats/${currentCourse.cid}?semester=${semester}`);
         const result = await response.json();
         
-        if (result.code === 0) {
+        if (result.code === 200) {
             displayStats(result.data);
         } else {
             console.error("加载统计信息失败:", result.message);
@@ -255,15 +243,15 @@ function displayGrades(grades) {
     grades.forEach(grade => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
-            <td>${grade.studentId || '-'}</td>
+            <td>${grade.studentNo || '-'}</td>
             <td>${grade.studentName || '-'}</td>
-            <td>${grade.courseId || '-'}</td>
+            <td>${grade.courseNo || '-'}</td>
             <td>${grade.courseName || '-'}</td>
             <td>${grade.semester || '-'}</td>
             <td>${grade.regularScore !== null ? grade.regularScore.toFixed(1) : '-'}</td>
             <td>${grade.examScore !== null ? grade.examScore.toFixed(1) : '-'}</td>
             <td>${grade.finalScore !== null ? grade.finalScore.toFixed(1) : '-'}</td>
-            <td>${grade.status || '-'}</td>
+            <td>${getStatusText(grade.status)}</td>
         `;
         tbody.appendChild(tr);
     });
@@ -278,8 +266,8 @@ function displayStats(stats) {
     }
 
     document.getElementById("avgScore").textContent = stats.averageScore ? stats.averageScore.toFixed(1) : "-";
-    document.getElementById("maxScore").textContent = stats.maxScore || "-";
-    document.getElementById("minScore").textContent = stats.minScore || "-";
+    document.getElementById("maxScore").textContent = stats.maxScore ? stats.maxScore.toFixed(1) : "-";
+    document.getElementById("minScore").textContent = stats.minScore ? stats.minScore.toFixed(1) : "-";
     document.getElementById("passRate").textContent = stats.passRate ? (stats.passRate * 100).toFixed(1) + "%" : "-";
     
     statsContainer.style.display = "block";

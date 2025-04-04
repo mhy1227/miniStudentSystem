@@ -143,6 +143,16 @@
 - 第四阶段：4天 ⚪
 - 第五阶段：3天 ⚪
 
+## 问题记录
+
+### 1. 学生查询接口400错误
+- 问题描述：使用学号"XH000001"查询学生信息时返回400错误
+- 原因分析：前端调用API路径错误，使用了`/api/students/${studentId}`而不是`/api/students/no/${studentId}`
+- 解决方案：修改前端代码中的API调用路径，使用正确的端点`/api/students/no/${studentId}`进行查询
+- 相关文件：
+  - `src/main/webapp/js/grade.js`
+  - `src/main/java/com/czj/student/controller/StudentController.java`
+
 ## 注意事项
 1. 代码规范
    - 统一的编码风格
