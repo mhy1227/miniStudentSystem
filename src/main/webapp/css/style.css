@@ -1,3 +1,4 @@
+/* 表格样式 */
 table { 
     border-collapse: collapse; 
     width: 100%; 
@@ -9,6 +10,51 @@ th, td {
     text-align: left; 
 }
 
+/* 表单样式 */
 .form-group { 
     margin: 10px 0; 
+}
+
+/* 导航菜单样式 */
+.nav-menu {
+    margin: 20px 0;
+}
+
+.nav-menu a {
+    margin-right: 20px;
+    text-decoration: none;
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    color: #333;
+}
+
+.nav-menu a:hover {
+    background-color: #f0f0f0;
+}
+
+/* 按钮样式 */
+button {
+    padding: 5px 15px;
+    margin-right: 10px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #f0f0f0;
+}
+
+/* 输入框样式 */
+input, select {
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    width: 200px;
+}
+
+label {
+    display: inline-block;
+    width: 100px;
 } 
