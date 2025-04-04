@@ -10,6 +10,15 @@ th, td {
     text-align: left; 
 }
 
+/* 操作栏样式 */
+.operation-bar {
+    margin: 10px 0;
+}
+
+.operation-bar button {
+    margin-right: 10px;
+}
+
 /* 表单样式 */
 .form-group { 
     margin: 10px 0; 
