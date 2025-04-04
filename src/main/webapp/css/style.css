@@ -54,6 +54,7 @@ tr:hover {
     padding: 10px;
     background-color: #f8f9fa;
     border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 .nav-menu a {
@@ -64,11 +65,25 @@ tr:hover {
     border-radius: 4px;
     color: #333;
     transition: all 0.3s ease;
+    display: inline-block;
+    position: relative;
 }
 
 .nav-menu a:hover {
     background-color: #e9ecef;
     border-color: #dee2e6;
+    transform: translateY(-1px);
+}
+
+.nav-menu a.active {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: #fff;
+}
+
+.nav-menu a.active:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
 }
 
 /* 按钮样式 */
@@ -194,4 +209,59 @@ h1, h2 {
     font-weight: bold;
     margin-right: 10px;
     color: #495057;
+}
+
+/* 功能导航样式 */
+.function-nav {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.function-item {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.function-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.function-item h3 {
+    color: #007bff;
+    margin-bottom: 10px;
+}
+
+.function-item p {
+    color: #666;
+    margin: 0;
+}
+
+/* 面包屑导航 */
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}
+
+.breadcrumb a {
+    color: #007bff;
+    text-decoration: none;
+    margin: 0 5px;
+}
+
+.breadcrumb span {
+    color: #666;
+    margin: 0 5px;
 } 
