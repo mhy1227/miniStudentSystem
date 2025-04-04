@@ -5,9 +5,18 @@ window.onload = function() {
 
 // 加载学生列表
 function loadStudents() {
-    fetch('/api/students')
-        .then(response => response.json())
+    console.log('开始加载学生列表...');
+    fetch('/api/students', {
+        headers: {
+            'Accept': 'application/json;charset=UTF-8'
+        }
+    })
+        .then(response => {
+            console.log('收到响应:', response);
+            return response.json();
+        })
         .then(result => {
+            console.log('解析后的数据:', result);
             if (result.code === 200) {
                 const tbody = document.getElementById('studentList');
                 tbody.innerHTML = '';
@@ -29,7 +38,10 @@ function loadStudents() {
                 alert('获取学生列表失败：' + result.message);
             }
         })
-        .catch(error => alert('获取学生列表失败：' + error));
+        .catch(error => {
+            console.error('请求失败:', error);
+            alert('获取学生列表失败：' + error);
+        });
 }
 
 // 保存学生信息
@@ -50,7 +62,8 @@ function saveStudent() {
     fetch(url, {
         method: method,
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json;charset=UTF-8',
+            'Accept': 'application/json;charset=UTF-8'
         },
         body: JSON.stringify(student)
     })

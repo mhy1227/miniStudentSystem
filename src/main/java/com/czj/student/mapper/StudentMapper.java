@@ -1,6 +1,6 @@
 package com.czj.student.mapper;
 
-import com.czj.student.entity.Student;
+import com.czj.student.model.entity.Student;
 import org.apache.ibatis.annotations.Param;
 import java.util.List;
 

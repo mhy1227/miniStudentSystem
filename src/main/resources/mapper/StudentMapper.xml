@@ -3,7 +3,7 @@
 <mapper namespace="com.czj.student.mapper.StudentMapper">
     
     <!-- 结果映射 -->
-    <resultMap id="BaseResultMap" type="com.czj.student.entity.Student">
+    <resultMap id="BaseResultMap" type="com.czj.student.model.entity.Student">
         <id column="sid" property="sid"/>
         <result column="sno" property="sno"/>
         <result column="name" property="name"/>
@@ -21,7 +21,7 @@
     </sql>
 
     <!-- 插入学生信息 -->
-    <insert id="insert" parameterType="com.czj.student.entity.Student" useGeneratedKeys="true" keyProperty="sid">
+    <insert id="insert" parameterType="com.czj.student.model.entity.Student" useGeneratedKeys="true" keyProperty="sid">
         INSERT INTO student (
             sno, name, sfzh, gender, major, remark
         ) VALUES (
@@ -35,7 +35,7 @@
     </delete>
 
     <!-- 更新学生信息 -->
-    <update id="update" parameterType="com.czj.student.entity.Student">
+    <update id="update" parameterType="com.czj.student.model.entity.Student">
         UPDATE student
         <set>
             <if test="sno != null">sno = #{sno},</if>
@@ -56,14 +56,14 @@
     </select>
 
     <!-- 根据学号查询学生 -->
-    <select id="selectByStudentNo" resultMap="BaseResultMap">
+    <select id="selectByStudentNo" resultType="com.czj.student.model.entity.Student">
         SELECT <include refid="Base_Column_List"/>
         FROM student
         WHERE sno = #{sno}
     </select>
 
     <!-- 查询学生列表 -->
-    <select id="selectList" resultMap="BaseResultMap">
+    <select id="selectList" resultType="com.czj.student.model.entity.Student">
         SELECT <include refid="Base_Column_List"/>
         FROM student
         <where>

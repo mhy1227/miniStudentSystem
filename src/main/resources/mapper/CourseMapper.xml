@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.czj.student.mapper.CourseMapper">
+    <select id="selectById" resultType="com.czj.student.model.entity.Course">
+        SELECT * FROM course WHERE cid = #{cid}
+    </select>
+
+    <select id="selectAll" resultType="com.czj.student.model.entity.Course">
+        SELECT * FROM course
+    </select>
+
+    <insert id="insert" parameterType="com.czj.student.model.entity.Course">
+        INSERT INTO course (course_no, name, credit)
+        VALUES (#{courseNo}, #{name}, #{credit})
+    </insert>
+
+    <update id="update" parameterType="com.czj.student.model.entity.Course">  
+        UPDATE course
+        SET name = #{name},
+            credit = #{credit}
+        WHERE cid = #{cid}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM course WHERE cid = #{cid}
+    </delete>
+</mapper>

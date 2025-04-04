@@ -3,7 +3,7 @@
 <mapper namespace="com.czj.student.mapper.StudentCourseMapper">
     
     <!-- 结果映射 -->
-    <resultMap id="BaseResultMap" type="com.czj.student.entity.StudentCourse">
+    <resultMap id="BaseResultMap" type="com.czj.student.model.entity.StudentCourse">
         <id column="student_sid" property="studentSid"/>
         <id column="course_cid" property="courseCid"/>
         <id column="semester" property="semester"/>
@@ -41,7 +41,7 @@
     </sql>
 
     <!-- 插入选课记录 -->
-    <insert id="insert" parameterType="com.czj.student.entity.StudentCourse">
+    <insert id="insert" parameterType="com.czj.student.model.entity.StudentCourse">
         INSERT INTO student_course (
             student_sid, course_cid, semester, status, selection_date,
             regular_score, exam_score, final_score,
@@ -56,7 +56,7 @@
     </insert>
 
     <!-- 更新选课及成绩信息 -->
-    <update id="update" parameterType="com.czj.student.entity.StudentCourse">
+    <update id="update" parameterType="com.czj.student.model.entity.StudentCourse">
         UPDATE student_course
         <set>
             <if test="status != null">status = #{status},</if>
@@ -82,7 +82,7 @@
     </delete>
 
     <!-- 查询单条记录 -->
-    <select id="selectOne" resultMap="BaseResultMap">
+    <select id="selectOne" resultType="com.czj.student.model.entity.StudentCourse">
         SELECT 
         <include refid="Base_Column_List"/>,
         <include refid="Extended_Column_List"/>
@@ -95,7 +95,7 @@
     </select>
 
     <!-- 查询学生的选课列表 -->
-    <select id="selectByStudent" resultMap="BaseResultMap">
+    <select id="selectByStudent" resultType="com.czj.student.model.entity.StudentCourse">
         SELECT 
         <include refid="Base_Column_List"/>,
         <include refid="Extended_Column_List"/>
@@ -110,7 +110,7 @@
     </select>
 
     <!-- 查询课程的选课学生列表 -->
-    <select id="selectByCourse" resultMap="BaseResultMap">
+    <select id="selectByCourse" resultType="com.czj.student.model.entity.StudentCourse">
         SELECT 
         <include refid="Base_Column_List"/>,
         <include refid="Extended_Column_List"/>
@@ -125,7 +125,7 @@
     </select>
 
     <!-- 条件查询选课列表 -->
-    <select id="selectList" resultMap="BaseResultMap">
+    <select id="selectList" resultType="com.czj.student.model.entity.StudentCourse">
         SELECT 
         <include refid="Base_Column_List"/>,
         <include refid="Extended_Column_List"/>

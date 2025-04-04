@@ -1,4 +1,4 @@
-package com.czj.student.entity;
+package com.czj.student.model.entity;
 
 import lombok.Data;
 import java.math.BigDecimal;

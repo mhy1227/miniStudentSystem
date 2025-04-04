@@ -1,6 +1,6 @@
 package com.czj.student.service.impl;
 
-import com.czj.student.entity.Student;
+import com.czj.student.model.entity.Student;
 import com.czj.student.mapper.StudentMapper;
 import com.czj.student.service.StudentService;
 import com.czj.student.util.PageRequest;

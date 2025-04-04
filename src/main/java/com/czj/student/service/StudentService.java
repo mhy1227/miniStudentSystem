@@ -1,7 +1,7 @@
 package com.czj.student.service;
 
 import org.springframework.stereotype.Service;
-import com.czj.student.entity.Student;
+import com.czj.student.model.entity.Student;
 import com.czj.student.util.PageRequest;
 import com.czj.student.util.PageResult;
 

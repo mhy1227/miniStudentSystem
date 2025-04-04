@@ -1,10 +1,12 @@
 package com.czj.student.controller;
 
 import com.czj.student.common.ApiResponse;
-import com.czj.student.entity.Student;
+import com.czj.student.model.entity.Student;
 import com.czj.student.service.StudentService;
 import com.czj.student.util.PageRequest;
 import com.czj.student.util.PageResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,6 +16,8 @@ import javax.validation.Valid;
 @RequestMapping("/api/students")
 public class StudentController {
     
+    private static final Logger log = LoggerFactory.getLogger(StudentController.class);
+    
     @Autowired
     private StudentService studentService;
     
@@ -22,8 +26,15 @@ public class StudentController {
      */
     @GetMapping
     public ApiResponse<PageResult<Student>> list(Student student, @Valid PageRequest pageRequest) {
-        PageResult<Student> result = studentService.listStudents(student, pageRequest);
-        return ApiResponse.success(result);
+        log.info("开始查询学生列表，查询参数：student={}, pageRequest={}", student, pageRequest);
+        try {
+            PageResult<Student> result = studentService.listStudents(student, pageRequest);
+            log.info("查询学生列表成功，总记录数：{}", result.getTotal());
+            return ApiResponse.success(result);
+        } catch (Exception e) {
+            log.error("查询学生列表失败", e);
+            return ApiResponse.error("查询学生列表失败：" + e.getMessage());
+        }
     }
     
     /**
