@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>成绩管理 - 学生信息管理系统</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>成绩管理</h1>
+        
+        <!-- 导航菜单 -->
+        <div class="nav-menu">
+            <a href="index.html">返回首页</a>
+            <a href="student.html">学生管理</a>
+            <a href="course.html">课程管理</a>
+            <a href="student-course.html">选课管理</a>
+        </div>
+
+        <!-- 查询区域 -->
+        <div class="search-area">
+            <div class="form-group">
+                <label for="studentId">学号：</label>
+                <input type="text" id="studentId" placeholder="请输入学号">
+                <button onclick="searchStudent()">查找学生</button>
+                <span id="studentName" class="hint-text"></span>
+            </div>
+            <div class="form-group">
+                <label for="courseId">课程号：</label>
+                <input type="text" id="courseId" placeholder="请输入课程号">
+                <button onclick="searchCourse()">查找课程</button>
+                <span id="courseName" class="hint-text"></span>
+            </div>
+            <div class="form-group">
+                <label for="semester">学期：</label>
+                <input type="text" id="semester" placeholder="例如：2023-2024-1">
+            </div>
+        </div>
+
+        <!-- 成绩录入区域 -->
+        <div class="operation-bar">
+            <div class="form-group">
+                <label for="regularScore">平时成绩：</label>
+                <input type="number" id="regularScore" min="0" max="100" step="0.1">
+                <button onclick="updateRegularScore()">录入平时成绩</button>
+            </div>
+            <div class="form-group">
+                <label for="examScore">考试成绩：</label>
+                <input type="number" id="examScore" min="0" max="100" step="0.1">
+                <button onclick="updateExamScore()">录入考试成绩</button>
+            </div>
+        </div>
+
+        <!-- 加载状态提示 -->
+        <div id="loadingIndicator" class="loading-indicator" style="display: none;">
+            <div class="spinner"></div>
+            <span>数据加载中...</span>
+        </div>
+
+        <!-- 成绩列表 -->
+        <div class="table-container">
+            <h2>成绩列表</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>学号</th>
+                        <th>学生姓名</th>
+                        <th>课程号</th>
+                        <th>课程名称</th>
+                        <th>学期</th>
+                        <th>平时成绩</th>
+                        <th>考试成绩</th>
+                        <th>最终成绩</th>
+                        <th>状态</th>
+                    </tr>
+                </thead>
+                <tbody id="gradeList">
+                    <!-- 成绩数据将通过JavaScript动态填充 -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 成绩统计 -->
+        <div class="stats-container" id="gradeStats" style="display: none;">
+            <h2>成绩统计</h2>
+            <div class="stats-grid">
+                <div class="stats-item">
+                    <label>平均分：</label>
+                    <span id="avgScore">-</span>
+                </div>
+                <div class="stats-item">
+                    <label>最高分：</label>
+                    <span id="maxScore">-</span>
+                </div>
+                <div class="stats-item">
+                    <label>最低分：</label>
+                    <span id="minScore">-</span>
+                </div>
+                <div class="stats-item">
+                    <label>及格率：</label>
+                    <span id="passRate">-</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/grade.js"></script>
+</body>
+</html> 
