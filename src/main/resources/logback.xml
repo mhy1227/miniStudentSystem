@@ -1,30 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+    <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"/>
+    
     <!-- 控制台输出 -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        <encoder charset="UTF-8">
+            <pattern>${LOG_PATTERN}</pattern>
         </encoder>
     </appender>
-
+    
     <!-- 文件输出 -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/mini-student-system.log</file>
+        <file>logs/app.log</file>
+        <encoder charset="UTF-8">
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>logs/mini-student-system.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <fileNamePattern>logs/app-%d{yyyy-MM-dd}.log</fileNamePattern>
             <maxHistory>30</maxHistory>
         </rollingPolicy>
-        <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
-        </encoder>
     </appender>
 
-    <!-- SQL日志 -->
-    <logger name="com.czj.student.mapper" level="DEBUG"/>
-
-    <!-- 根日志级别 -->
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="FILE"/>
     </root>
+    
+    <!-- MyBatis SQL日志 -->
+    <logger name="com.czj.student.mapper" level="DEBUG"/>
 </configuration>
