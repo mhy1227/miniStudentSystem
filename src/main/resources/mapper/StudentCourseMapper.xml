@@ -18,7 +18,7 @@
         <result column="remark" property="remark"/>
         <result column="created_time" property="createdTime"/>
         <result column="updated_time" property="updatedTime"/>
-        <!-- 扩展字段 -->
+        <!-- 关联字段 -->
         <result column="student_name" property="studentName"/>
         <result column="student_no" property="studentNo"/>
         <result column="course_name" property="courseName"/>
@@ -34,28 +34,24 @@
         sc.remark, sc.created_time, sc.updated_time
     </sql>
 
-    <!-- 扩展查询列 -->
-    <sql id="Extended_Column_List">
-        s.name as student_name, s.student_no,
+    <!-- 关联查询列 -->
+    <sql id="Join_Column_List">
+        s.name as student_name, s.sno as student_no,
         c.name as course_name, c.course_no, c.credit
     </sql>
 
-    <!-- 插入选课记录 -->
+    <!-- 新增选课记录 -->
     <insert id="insert" parameterType="com.czj.student.model.entity.StudentCourse">
         INSERT INTO student_course (
-            student_sid, course_cid, semester, status, selection_date,
-            regular_score, exam_score, final_score,
-            regular_score_date, exam_score_date, final_score_date,
-            remark
+            student_sid, course_cid, semester, status, 
+            selection_date, remark
         ) VALUES (
-            #{studentSid}, #{courseCid}, #{semester}, #{status}, #{selectionDate},
-            #{regularScore}, #{examScore}, #{finalScore},
-            #{regularScoreDate}, #{examScoreDate}, #{finalScoreDate},
-            #{remark}
+            #{studentSid}, #{courseCid}, #{semester}, #{status},
+            #{selectionDate}, #{remark}
         )
     </insert>
 
-    <!-- 更新选课及成绩信息 -->
+    <!-- 更新选课记录 -->
     <update id="update" parameterType="com.czj.student.model.entity.StudentCourse">
         UPDATE student_course
         <set>
@@ -75,17 +71,17 @@
 
     <!-- 删除选课记录 -->
     <delete id="delete">
-        DELETE FROM student_course
+        DELETE FROM student_course 
         WHERE student_sid = #{studentSid}
         AND course_cid = #{courseCid}
         AND semester = #{semester}
     </delete>
 
-    <!-- 查询单条记录 -->
-    <select id="selectOne" resultType="com.czj.student.model.entity.StudentCourse">
+    <!-- 查询单个选课记录 -->
+    <select id="selectOne" resultMap="BaseResultMap">
         SELECT 
-        <include refid="Base_Column_List"/>,
-        <include refid="Extended_Column_List"/>
+            <include refid="Base_Column_List"/>,
+            <include refid="Join_Column_List"/>
         FROM student_course sc
         LEFT JOIN student s ON sc.student_sid = s.sid
         LEFT JOIN course c ON sc.course_cid = c.cid
@@ -95,10 +91,10 @@
     </select>
 
     <!-- 查询学生的选课列表 -->
-    <select id="selectByStudent" resultType="com.czj.student.model.entity.StudentCourse">
+    <select id="selectByStudent" resultMap="BaseResultMap">
         SELECT 
-        <include refid="Base_Column_List"/>,
-        <include refid="Extended_Column_List"/>
+            <include refid="Base_Column_List"/>,
+            <include refid="Join_Column_List"/>
         FROM student_course sc
         LEFT JOIN student s ON sc.student_sid = s.sid
         LEFT JOIN course c ON sc.course_cid = c.cid
@@ -106,14 +102,14 @@
         <if test="semester != null and semester != ''">
             AND sc.semester = #{semester}
         </if>
-        ORDER BY sc.selection_date DESC
+        ORDER BY sc.semester DESC, sc.selection_date DESC
     </select>
 
     <!-- 查询课程的选课学生列表 -->
-    <select id="selectByCourse" resultType="com.czj.student.model.entity.StudentCourse">
+    <select id="selectByCourse" resultMap="BaseResultMap">
         SELECT 
-        <include refid="Base_Column_List"/>,
-        <include refid="Extended_Column_List"/>
+            <include refid="Base_Column_List"/>,
+            <include refid="Join_Column_List"/>
         FROM student_course sc
         LEFT JOIN student s ON sc.student_sid = s.sid
         LEFT JOIN course c ON sc.course_cid = c.cid
@@ -121,64 +117,50 @@
         <if test="semester != null and semester != ''">
             AND sc.semester = #{semester}
         </if>
-        ORDER BY sc.selection_date DESC
+        ORDER BY sc.selection_date
     </select>
 
     <!-- 条件查询选课列表 -->
-    <select id="selectList" resultType="com.czj.student.model.entity.StudentCourse">
+    <select id="selectList" resultMap="BaseResultMap">
         SELECT 
-        <include refid="Base_Column_List"/>,
-        <include refid="Extended_Column_List"/>
+            <include refid="Base_Column_List"/>,
+            <include refid="Join_Column_List"/>
         FROM student_course sc
         LEFT JOIN student s ON sc.student_sid = s.sid
         LEFT JOIN course c ON sc.course_cid = c.cid
         <where>
+            <if test="studentSid != null">
+                AND sc.student_sid = #{studentSid}
+            </if>
+            <if test="courseCid != null">
+                AND sc.course_cid = #{courseCid}
+            </if>
             <if test="semester != null and semester != ''">
                 AND sc.semester = #{semester}
             </if>
             <if test="status != null">
                 AND sc.status = #{status}
             </if>
-            <if test="studentName != null and studentName != ''">
-                AND s.name LIKE CONCAT('%', #{studentName}, '%')
-            </if>
-            <if test="studentNo != null and studentNo != ''">
-                AND s.student_no LIKE CONCAT('%', #{studentNo}, '%')
-            </if>
-            <if test="courseName != null and courseName != ''">
-                AND c.name LIKE CONCAT('%', #{courseName}, '%')
-            </if>
-            <if test="courseNo != null and courseNo != ''">
-                AND c.course_no LIKE CONCAT('%', #{courseNo}, '%')
-            </if>
         </where>
-        ORDER BY sc.selection_date DESC
+        ORDER BY sc.semester DESC, sc.selection_date DESC
     </select>
 
     <!-- 查询总记录数 -->
     <select id="selectCount" resultType="long">
         SELECT COUNT(*)
         FROM student_course sc
-        LEFT JOIN student s ON sc.student_sid = s.sid
-        LEFT JOIN course c ON sc.course_cid = c.cid
         <where>
+            <if test="studentSid != null">
+                AND sc.student_sid = #{studentSid}
+            </if>
+            <if test="courseCid != null">
+                AND sc.course_cid = #{courseCid}
+            </if>
             <if test="semester != null and semester != ''">
                 AND sc.semester = #{semester}
             </if>
             <if test="status != null">
                 AND sc.status = #{status}
-            </if>
-            <if test="studentName != null and studentName != ''">
-                AND s.name LIKE CONCAT('%', #{studentName}, '%')
-            </if>
-            <if test="studentNo != null and studentNo != ''">
-                AND s.student_no LIKE CONCAT('%', #{studentNo}, '%')
-            </if>
-            <if test="courseName != null and courseName != ''">
-                AND c.name LIKE CONCAT('%', #{courseName}, '%')
-            </if>
-            <if test="courseNo != null and courseNo != ''">
-                AND c.course_no LIKE CONCAT('%', #{courseNo}, '%')
             </if>
         </where>
     </select>

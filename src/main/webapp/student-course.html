@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>选课管理</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <h1>选课管理</h1>
+    
+    <!-- 导航菜单 -->
+    <div class="nav-menu">
+        <a href="index.html">返回首页</a>
+        <a href="student.html">学生管理</a>
+        <a href="course.html">课程管理</a>
+    </div>
+    
+    <!-- 选课表单 -->
+    <div>
+        <h2>选课</h2>
+        <div class="form-group">
+            <label>学期：</label>
+            <input type="text" id="semester" placeholder="例如：2023-2024-2">
+        </div>
+        <div class="form-group">
+            <label>学号：</label>
+            <input type="text" id="studentNo" placeholder="输入学号">
+            <button onclick="searchStudent()">查找学生</button>
+        </div>
+        <div class="form-group">
+            <label>学生姓名：</label>
+            <span id="studentName"></span>
+            <input type="hidden" id="studentSid">
+        </div>
+        <div class="form-group">
+            <label>课程编号：</label>
+            <input type="text" id="courseNo" placeholder="输入课程编号">
+            <button onclick="searchCourse()">查找课程</button>
+        </div>
+        <div class="form-group">
+            <label>课程名称：</label>
+            <span id="courseName"></span>
+            <input type="hidden" id="courseCid">
+        </div>
+        <button onclick="selectCourse()">选课</button>
+    </div>
+
+    <!-- 已选课程列表 -->
+    <div>
+        <h2>已选课程</h2>
+        <div class="form-group">
+            <label>查询学期：</label>
+            <input type="text" id="querySemester" placeholder="例如：2023-2024-2">
+            <button onclick="searchStudentCourses()">查询</button>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>学期</th>
+                    <th>课程编号</th>
+                    <th>课程名称</th>
+                    <th>学分</th>
+                    <th>选课日期</th>
+                    <th>状态</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="studentCourseList"></tbody>
+        </table>
+    </div>
+
+    <script src="js/student-course.js"></script>
+</body>
+</html> 
