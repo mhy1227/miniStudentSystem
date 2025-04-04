@@ -14,9 +14,24 @@ public interface CourseMapper {
     Course selectById(@Param("cid") Long cid);
 
     /**
+     * 根据课程编号查询课程
+     */
+    Course selectByCourseNo(@Param("courseNo") String courseNo);
+
+    /**
      * 查询所有课程
      */
     List<Course> selectAll();
+
+    /**
+     * 条件查询课程列表
+     */
+    List<Course> selectList(Course course);
+
+    /**
+     * 查询总记录数
+     */
+    long selectCount(Course course);
 
     /**
      * 新增课程
@@ -32,4 +47,8 @@ public interface CourseMapper {
      * 删除课程
      */
     int delete(@Param("cid") Long cid);
+
+
+        
+
 } 

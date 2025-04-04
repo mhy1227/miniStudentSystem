@@ -1,27 +1,95 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.czj.student.mapper.CourseMapper">
-    <select id="selectById" resultType="com.czj.student.model.entity.Course">
-        SELECT * FROM course WHERE cid = #{cid}
+    <!-- 结果映射 -->
+    <resultMap id="BaseResultMap" type="com.czj.student.model.entity.Course">
+        <id column="cid" property="cid"/>
+        <result column="course_no" property="courseNo"/>
+        <result column="name" property="name"/>
+        <result column="credit" property="credit"/>
+        <result column="created_time" property="createdTime"/>
+        <result column="updated_time" property="updatedTime"/>
+    </resultMap>
+
+    <!-- 通用查询列 -->
+    <sql id="Base_Column_List">
+        cid, course_no, name, credit, created_time, updated_time
+    </sql>
+
+    <!-- 根据ID查询课程 -->
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM course 
+        WHERE cid = #{cid}
     </select>
 
-    <select id="selectAll" resultType="com.czj.student.model.entity.Course">
-        SELECT * FROM course
+    <!-- 根据课程编号查询课程 -->
+    <select id="selectByCourseNo" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM course 
+        WHERE course_no = #{courseNo}
     </select>
 
+    <!-- 查询所有课程 -->
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM course
+        ORDER BY course_no
+    </select>
+
+    <!-- 条件查询课程列表 -->
+    <select id="selectList" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM course
+        <where>
+            <if test="courseNo != null and courseNo != ''">
+                AND course_no LIKE CONCAT('%', #{courseNo}, '%')
+            </if>
+            <if test="name != null and name != ''">
+                AND name LIKE CONCAT('%', #{name}, '%')
+            </if>
+        </where>
+        ORDER BY course_no
+    </select>
+
+    <!-- 查询总记录数 -->
+    <select id="selectCount" resultType="long">
+        SELECT COUNT(*)
+        FROM course
+        <where>
+            <if test="courseNo != null and courseNo != ''">
+                AND course_no LIKE CONCAT('%', #{courseNo}, '%')
+            </if>
+            <if test="name != null and name != ''">
+                AND name LIKE CONCAT('%', #{name}, '%')
+            </if>
+        </where>
+    </select>
+
+    <!-- 新增课程 -->
     <insert id="insert" parameterType="com.czj.student.model.entity.Course">
-        INSERT INTO course (course_no, name, credit)
-        VALUES (#{courseNo}, #{name}, #{credit})
+        INSERT INTO course (
+            course_no, 
+            name, 
+            credit
+        ) VALUES (
+            #{courseNo}, 
+            #{name}, 
+            #{credit}
+        )
     </insert>
 
+    <!-- 更新课程 -->
     <update id="update" parameterType="com.czj.student.model.entity.Course">  
         UPDATE course
         SET name = #{name},
             credit = #{credit}
         WHERE cid = #{cid}
     </update>
-
+    
+    <!-- 删除课程 -->
     <delete id="delete">
-        DELETE FROM course WHERE cid = #{cid}
+        DELETE FROM course 
+        WHERE cid = #{cid}
     </delete>
 </mapper>

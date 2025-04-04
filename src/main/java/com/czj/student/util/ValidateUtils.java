@@ -105,4 +105,40 @@ public class ValidateUtils {
         }
         return credit >= 0 && credit <= 10;
     }
+    /*
+     * 验证对象是否为空
+     */
+    public static void notNull(Object object, String message) {
+        if (object == null) {
+            throw new IllegalArgumentException(message);
+        }
+    }   
+
+    /*
+     * 验证字符串是否为空
+     */
+    public static void hasText(String text, String message) {
+        if (StringUtils.isEmpty(text)) {
+            throw new IllegalArgumentException(message);
+        }
+    }   
+
+    /*
+     * 验证布尔表达式是否为真
+     */
+    public static void isTrue(boolean expression, String message) {
+        if (!expression) {
+            throw new IllegalArgumentException(message);
+        }
+    }   
+
+    /*
+     * 验证布尔表达式是否为假
+     */
+
+    public static void isFalse(boolean expression, String message) {
+        if (expression) {
+            throw new IllegalArgumentException(message);
+        }
+    }   
 } 

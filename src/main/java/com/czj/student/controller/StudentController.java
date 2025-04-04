@@ -27,14 +27,9 @@ public class StudentController {
     @GetMapping
     public ApiResponse<PageResult<Student>> list(Student student, @Valid PageRequest pageRequest) {
         log.info("开始查询学生列表，查询参数：student={}, pageRequest={}", student, pageRequest);
-        try {
-            PageResult<Student> result = studentService.listStudents(student, pageRequest);
-            log.info("查询学生列表成功，总记录数：{}", result.getTotal());
-            return ApiResponse.success(result);
-        } catch (Exception e) {
-            log.error("查询学生列表失败", e);
-            return ApiResponse.error("查询学生列表失败：" + e.getMessage());
-        }
+        PageResult<Student> result = studentService.listStudents(student, pageRequest);
+        log.info("查询学生列表成功，总记录数：{}", result.getTotal());
+        return ApiResponse.success(result);
     }
     
     /**
@@ -61,6 +56,7 @@ public class StudentController {
     @PostMapping
     public ApiResponse<Void> add(@RequestBody @Valid Student student) {
         studentService.addStudent(student);
+        log.info("新增学生成功，sno={}", student.getSno());
         return ApiResponse.success();
     }
     
@@ -71,6 +67,7 @@ public class StudentController {
     public ApiResponse<Void> update(@PathVariable Long sid, @RequestBody @Valid Student student) {
         student.setSid(sid);
         studentService.updateStudent(student);
+        log.info("更新学生成功，sid={}", sid);
         return ApiResponse.success();
     }
     
@@ -80,6 +77,7 @@ public class StudentController {
     @DeleteMapping("/{sid}")
     public ApiResponse<Void> delete(@PathVariable Long sid) {
         studentService.deleteStudent(sid);
+        log.info("删除学生成功，sid={}", sid);
         return ApiResponse.success();
     }
 }
