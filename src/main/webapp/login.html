@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生管理系统 - 登录</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.2.3/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f5f5f5;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            padding-top: 40px;
+            padding-bottom: 40px;
+        }
+        .form-signin {
+            width: 100%;
+            max-width: 330px;
+            padding: 15px;
+            margin: auto;
+        }
+        .form-signin .form-floating:focus-within {
+            z-index: 2;
+        }
+        .form-signin input[type="text"] {
+            margin-bottom: -1px;
+            border-bottom-right-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+        .form-signin input[type="password"] {
+            margin-bottom: 10px;
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+        }
+        .error-message {
+            color: #dc3545;
+            margin-bottom: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <main class="form-signin text-center">
+        <form id="loginForm">
+            <h1 class="h3 mb-3 fw-normal">学生管理系统</h1>
+            <div class="form-floating">
+                <input type="text" class="form-control" id="sno" name="sno" placeholder="学号" required>
+                <label for="sno">学号</label>
+            </div>
+            <div class="form-floating">
+                <input type="password" class="form-control" id="pwd" name="pwd" placeholder="密码" required>
+                <label for="pwd">密码</label>
+            </div>
+            <div id="errorMessage" class="error-message"></div>
+            <button class="w-100 btn btn-lg btn-primary" type="submit">登录</button>
+            <p class="mt-5 mb-3 text-muted">&copy; 2024 学生管理系统</p>
+        </form>
+    </main>
+
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // 检查是否已登录
+            $.get('/api/auth/current-user')
+                .done(function(response) {
+                    if (response.data) {
+                        window.location.href = '/index.html';
+                    }
+                });
+
+            // 表单提交
+            $('#loginForm').on('submit', function(e) {
+                e.preventDefault();
+                
+                const loginData = {
+                    sno: $('#sno').val(),
+                    pwd: $('#pwd').val()
+                };
+
+                // 清除错误信息
+                $('#errorMessage').hide();
+
+                // 发送登录请求
+                $.ajax({
+                    url: '/api/auth/login',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(loginData),
+                    success: function(response) {
+                        if (response.code === 200) {
+                            window.location.href = '/index.html';
+                        } else {
+                            showError(response.message);
+                        }
+                    },
+                    error: function(xhr) {
+                        const response = xhr.responseJSON;
+                        showError(response ? response.message : '登录失败，请稍后重试');
+                    }
+                });
+            });
+
+            function showError(message) {
+                $('#errorMessage').text(message).show();
+            }
+        });
+    </script>
+</body>
+</html> 
