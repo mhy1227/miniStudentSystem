@@ -71,19 +71,28 @@
 
             // 退出登录
             $('#logoutBtn').click(function() {
+                // 禁用退出按钮，防止重复点击
+                $('#logoutBtn').prop('disabled', true).text('退出中...');
+                
                 $.ajax({
                     url: '/api/auth/logout',
                     type: 'POST',
                     success: function(response) {
                         if (response.code === 200) {
-                            // 使用 replace 方法替换当前页面，防止后退
-                            window.location.replace('login.html');
+                            // 等待一小段时间确保session已清除
+                            setTimeout(function() {
+                                window.location.replace('login.html');
+                            }, 100);
                         } else {
                             alert('退出失败，请重试');
+                            // 恢复按钮状态
+                            $('#logoutBtn').prop('disabled', false).text('退出');
                         }
                     },
                     error: function() {
                         alert('退出请求失败，请重试');
+                        // 恢复按钮状态
+                        $('#logoutBtn').prop('disabled', false).text('退出');
                     }
                 });
             });

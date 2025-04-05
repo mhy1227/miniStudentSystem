@@ -91,16 +91,21 @@
         $(document).ready(function() {
             generateCaptcha();
 
-            // 检查是否已登录
-            $.ajax({
-                url: '/api/auth/current-user',
-                type: 'GET',
-                success: function(response) {
-                    if (response.code === 200 && response.data) {
-                        window.location.href = 'index.html';
+            // 检查是否已登录，添加延时确保session已清除
+            setTimeout(function() {
+                $.ajax({
+                    url: '/api/auth/current-user',
+                    type: 'GET',
+                    success: function(response) {
+                        if (response.code === 200 && response.data) {
+                            // 如果是从退出页面来的，不要自动跳转
+                            if (!document.referrer.includes('index.html')) {
+                                window.location.href = 'index.html';
+                            }
+                        }
                     }
-                }
-            });
+                });
+            }, 100); // 添加100ms延时
 
             $('#loginForm').on('submit', function(e) {
                 e.preventDefault();
