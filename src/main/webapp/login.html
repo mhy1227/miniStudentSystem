@@ -167,7 +167,11 @@
                     },
                     error: function(xhr) {
                         const response = xhr.responseJSON;
-                        showError(response ? response.message : '登录请求失败，请稍后重试');
+                        if (response && response.message) {
+                            showError(response.message);
+                        } else {
+                            showError('登录请求失败，请稍后重试');
+                        }
                         // 请求失败时刷新验证码
                         generateCaptcha();
                         $('#captcha').val('');
