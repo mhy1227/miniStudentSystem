@@ -4,123 +4,147 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>学生管理系统 - 登录</title>
-    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.2.3/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            background-color: #f5f5f5;
-            height: 100vh;
             display: flex;
+            justify-content: center;
             align-items: center;
-            padding-top: 40px;
-            padding-bottom: 40px;
+            height: 100vh;
+            margin: 0;
+            background-color: #f5f5f5;
         }
-        .form-signin {
+        .login-container {
+            width: 300px;
+            padding: 20px;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input {
             width: 100%;
-            max-width: 330px;
-            padding: 15px;
-            margin: auto;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
         }
-        .form-signin .form-floating:focus-within {
-            z-index: 2;
+        .login-btn {
+            width: 100%;
+            padding: 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
         }
-        .form-signin input[type="text"] {
-            margin-bottom: -1px;
-            border-bottom-right-radius: 0;
-            border-bottom-left-radius: 0;
-        }
-        .form-signin input[type="password"] {
-            margin-bottom: 10px;
-            border-top-left-radius: 0;
-            border-top-right-radius: 0;
+        .login-btn:hover {
+            background: #0056b3;
         }
         .error-message {
-            color: #dc3545;
+            color: red;
             margin-bottom: 10px;
             display: none;
+        }
+        .text-center {
+            text-align: center;
         }
     </style>
 </head>
 <body>
-    <main class="form-signin text-center">
-        <form id="loginForm" method="post" action="javascript:void(0);">
-            <h1 class="h3 mb-3 fw-normal">学生管理系统</h1>
-            <div class="form-floating">
-                <input type="text" class="form-control" id="sno" name="sno" placeholder="学号" required>
+    <div class="login-container">
+        <h2 class="text-center">学生管理系统</h2>
+        <form id="loginForm" onsubmit="return handleSubmit(event)">
+            <div class="form-group">
                 <label for="sno">学号</label>
+                <input type="text" id="sno" name="sno" required>
             </div>
-            <div class="form-floating">
-                <input type="password" class="form-control" id="pwd" name="pwd" placeholder="密码" required>
+            <div class="form-group">
                 <label for="pwd">密码</label>
+                <input type="password" id="pwd" name="pwd" required>
             </div>
             <div id="errorMessage" class="error-message"></div>
-            <button class="w-100 btn btn-lg btn-primary" type="submit">登录</button>
-            <p class="mt-5 mb-3 text-muted">&copy; 2024 学生管理系统</p>
+            <button type="submit" class="login-btn">登录</button>
         </form>
-    </main>
+        <p class="text-center" style="margin-top: 20px; color: #666;">
+            &copy; 2024 学生管理系统
+        </p>
+    </div>
 
-    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script>
-        $(document).ready(function() {
-            // 检查是否已登录
-            $.ajax({
-                url: '/api/auth/current-user',
-                type: 'GET',
+        // 页面加载完成后检查登录状态
+        window.onload = function() {
+            checkLoginStatus();
+        };
+
+        // 检查登录状态
+        function checkLoginStatus() {
+            fetch('/api/auth/current-user', {
+                method: 'GET',
                 headers: {
                     'Accept': 'application/json'
-                },
-                success: function(response) {
-                    console.log('检查登录状态:', response);
-                    if (response.code === 200 && response.data) {
-                        window.location.href = '/index.html';
-                    }
                 }
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('检查登录状态:', data);
+                if (data.code === 200 && data.data) {
+                    window.location.href = '/index.html';
+                }
+            })
+            .catch(error => console.error('检查登录状态出错:', error));
+        }
+
+        // 处理表单提交
+        function handleSubmit(event) {
+            event.preventDefault();
+            
+            const sno = document.getElementById('sno').value.trim();
+            const pwd = document.getElementById('pwd').value.trim();
+            const errorMessage = document.getElementById('errorMessage');
+            
+            // 清除错误信息
+            errorMessage.style.display = 'none';
+            
+            console.log('准备发送登录请求:', { sno, pwd });
+
+            // 发送登录请求
+            fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ sno, pwd })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('登录响应:', data);
+                if (data.code === 200) {
+                    window.location.href = '/index.html';
+                } else {
+                    showError(data.message || '登录失败');
+                }
+            })
+            .catch(error => {
+                console.error('登录错误:', error);
+                showError('登录失败，请稍后重试');
             });
 
-            // 表单提交
-            $('#loginForm').on('submit', function(e) {
-                e.preventDefault(); // 阻止默认提交
-                
-                const loginData = {
-                    sno: $('#sno').val().trim(),
-                    pwd: $('#pwd').val().trim()
-                };
+            return false;
+        }
 
-                // 清除错误信息
-                $('#errorMessage').hide();
-
-                console.log('准备发送登录请求:', loginData);
-
-                // 发送登录请求
-                $.ajax({
-                    url: '/api/auth/login',
-                    type: 'POST',
-                    contentType: 'application/json',
-                    headers: {
-                        'Accept': 'application/json'
-                    },
-                    data: JSON.stringify(loginData),
-                    success: function(response) {
-                        console.log('登录响应:', response);
-                        if (response.code === 200) {
-                            window.location.href = '/index.html';
-                        } else {
-                            showError(response.message || '登录失败');
-                        }
-                    },
-                    error: function(xhr) {
-                        console.log('登录错误:', xhr);
-                        const response = xhr.responseJSON;
-                        showError(response ? response.message : '登录失败，请稍后重试');
-                    }
-                });
-
-                return false; // 阻止表单提交
-            });
-
-            function showError(message) {
-                $('#errorMessage').text(message).show();
-            }
-        });
+        // 显示错误信息
+        function showError(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+        }
     </script>
 </body>
 </html> 
