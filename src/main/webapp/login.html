@@ -25,16 +25,25 @@
             align-items: center;
             gap: 10px;
         }
+        .captcha-input {
+            width: 100px !important;
+        }
         .captcha-text {
             font-size: 18px;
             font-weight: bold;
             color: #666;
             user-select: none;
+            min-width: 100px;
+            text-align: center;
         }
         .refresh-captcha {
             cursor: pointer;
             color: #007bff;
             font-size: 14px;
+            white-space: nowrap;
+        }
+        .btn-block {
+            width: 100%;
         }
     </style>
 </head>
@@ -54,7 +63,7 @@
                 <div class="form-group">
                     <label for="captcha">验证码：</label>
                     <div class="captcha-container">
-                        <input type="number" class="form-control" id="captcha" name="captcha" required>
+                        <input type="number" class="form-control captcha-input" id="captcha" name="captcha" required>
                         <span class="captcha-text" id="captchaQuestion"></span>
                         <span class="refresh-captcha" onclick="generateCaptcha()">刷新</span>
                     </div>
