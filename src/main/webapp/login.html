@@ -42,7 +42,7 @@
 </head>
 <body>
     <main class="form-signin text-center">
-        <form id="loginForm">
+        <form id="loginForm" method="post" action="javascript:void(0);">
             <h1 class="h3 mb-3 fw-normal">学生管理系统</h1>
             <div class="form-floating">
                 <input type="text" class="form-control" id="sno" name="sno" placeholder="学号" required>
@@ -62,43 +62,59 @@
     <script>
         $(document).ready(function() {
             // 检查是否已登录
-            $.get('/api/auth/current-user')
-                .done(function(response) {
-                    if (response.data) {
+            $.ajax({
+                url: '/api/auth/current-user',
+                type: 'GET',
+                headers: {
+                    'Accept': 'application/json'
+                },
+                success: function(response) {
+                    console.log('检查登录状态:', response);
+                    if (response.code === 200 && response.data) {
                         window.location.href = '/index.html';
                     }
-                });
+                }
+            });
 
             // 表单提交
             $('#loginForm').on('submit', function(e) {
-                e.preventDefault();
+                e.preventDefault(); // 阻止默认提交
                 
                 const loginData = {
-                    sno: $('#sno').val(),
-                    pwd: $('#pwd').val()
+                    sno: $('#sno').val().trim(),
+                    pwd: $('#pwd').val().trim()
                 };
 
                 // 清除错误信息
                 $('#errorMessage').hide();
+
+                console.log('准备发送登录请求:', loginData);
 
                 // 发送登录请求
                 $.ajax({
                     url: '/api/auth/login',
                     type: 'POST',
                     contentType: 'application/json',
+                    headers: {
+                        'Accept': 'application/json'
+                    },
                     data: JSON.stringify(loginData),
                     success: function(response) {
+                        console.log('登录响应:', response);
                         if (response.code === 200) {
                             window.location.href = '/index.html';
                         } else {
-                            showError(response.message);
+                            showError(response.message || '登录失败');
                         }
                     },
                     error: function(xhr) {
+                        console.log('登录错误:', xhr);
                         const response = xhr.responseJSON;
                         showError(response ? response.message : '登录失败，请稍后重试');
                     }
                 });
+
+                return false; // 阻止表单提交
             });
 
             function showError(message) {
