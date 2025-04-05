@@ -40,13 +40,17 @@ public class LoginServiceImpl implements LoginService {
 
         // 3. 验证密码
         if (!student.getPwd().equals(loginVO.getPwd())) {
-            // 更新错误次数
-            int errorCount = getLoginErrorCount(session) + 1;
+            // 更新数据库中的错误次数
+            int errorCount = (student.getLoginErrorCount() == null ? 0 : student.getLoginErrorCount()) + 1;
+            loginMapper.updateLoginErrorCount(loginVO.getSno(), errorCount);
+            
+            // 同时更新session中的错误次数和锁定时间
             session.setAttribute(LoginConstants.SESSION_ERROR_COUNT_KEY, errorCount);
             
             if (errorCount >= LoginConstants.MAX_ERROR_COUNT) {
                 // 设置锁定时间
-                session.setAttribute(LoginConstants.SESSION_LOCK_TIME_KEY, LocalDateTime.now());
+                LocalDateTime lockTime = LocalDateTime.now();
+                session.setAttribute(LoginConstants.SESSION_LOCK_TIME_KEY, lockTime);
                 throw new RuntimeException("密码错误次数过多，账号已锁定");
             }
             
@@ -57,7 +61,7 @@ public class LoginServiceImpl implements LoginService {
         session.removeAttribute(LoginConstants.SESSION_ERROR_COUNT_KEY);
         session.removeAttribute(LoginConstants.SESSION_LOCK_TIME_KEY);
 
-        // 5. 更新登录时间
+        // 5. 更新登录时间和重置错误次数
         loginMapper.updateLastLoginTime(loginVO.getSno());
         loginMapper.updateLoginErrorCount(loginVO.getSno(), 0);
 
@@ -86,28 +90,32 @@ public class LoginServiceImpl implements LoginService {
 
     @Override
     public boolean isAccountLocked(String sno, HttpSession session) {
+        // 先检查session中的锁定状态
         LocalDateTime lockTime = (LocalDateTime) session.getAttribute(LoginConstants.SESSION_LOCK_TIME_KEY);
-        if (lockTime == null) {
-            return false;
+        if (lockTime != null) {
+            // 检查是否超过锁定时间
+            long minutes = ChronoUnit.MINUTES.between(lockTime, LocalDateTime.now());
+            if (minutes >= LoginConstants.LOCK_TIME_MINUTES) {
+                // 锁定时间已过，清除锁定状态
+                session.removeAttribute(LoginConstants.SESSION_LOCK_TIME_KEY);
+                session.removeAttribute(LoginConstants.SESSION_ERROR_COUNT_KEY);
+                // 重置数据库中的错误次数
+                loginMapper.updateLoginErrorCount(sno, 0);
+                return false;
+            }
+            return true;
         }
 
-        // 检查是否超过锁定时间
-        long minutes = ChronoUnit.MINUTES.between(lockTime, LocalDateTime.now());
-        if (minutes >= LoginConstants.LOCK_TIME_MINUTES) {
-            // 锁定时间已过，清除锁定状态
-            session.removeAttribute(LoginConstants.SESSION_LOCK_TIME_KEY);
-            session.removeAttribute(LoginConstants.SESSION_ERROR_COUNT_KEY);
-            return false;
+        // 检查数据库中的错误次数
+        Student student = loginMapper.getStudentBySno(sno);
+        if (student != null && student.getLoginErrorCount() != null && 
+            student.getLoginErrorCount() >= LoginConstants.MAX_ERROR_COUNT) {
+            // 如果数据库中的错误次数达到上限，设置session锁定状态
+            session.setAttribute(LoginConstants.SESSION_LOCK_TIME_KEY, LocalDateTime.now());
+            session.setAttribute(LoginConstants.SESSION_ERROR_COUNT_KEY, student.getLoginErrorCount());
+            return true;
         }
 
-        return true;
-    }
-
-    /**
-     * 获取登录错误次数
-     */
-    private int getLoginErrorCount(HttpSession session) {
-        Integer errorCount = (Integer) session.getAttribute(LoginConstants.SESSION_ERROR_COUNT_KEY);
-        return errorCount == null ? 0 : errorCount;
+        return false;
     }
 } 
