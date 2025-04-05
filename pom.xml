@@ -30,6 +30,12 @@
             <version>${spring.version}</version>
         </dependency>
 
+        <!-- AspectJ依赖 -->
+        <dependency>
+            <groupId>org.aspectj</groupId>
+            <artifactId>aspectjweaver</artifactId>
+            <version>1.9.7</version>
+        </dependency>
         <!-- MyBatis -->
         <dependency>
             <groupId>org.mybatis</groupId>

@@ -1,5 +1,6 @@
 package com.czj.student.controller;
 
+import com.czj.student.annotation.Log;
 import com.czj.student.common.ApiResponse;
 import com.czj.student.model.entity.Student;
 import com.czj.student.service.StudentService;
@@ -24,6 +25,7 @@ public class StudentController {
     /**
      * 分页查询学生列表
      */
+    @Log(module = "学生管理", type = "查询", description = "分页查询学生列表")
     @GetMapping
     public ApiResponse<PageResult<Student>> list(Student student, @Valid PageRequest pageRequest) {
         log.info("开始查询学生列表，查询参数：student={}, pageRequest={}", student, pageRequest);
@@ -35,6 +37,7 @@ public class StudentController {
     /**
      * 根据ID查询学生
      */
+    @Log(module = "学生管理", type = "查询", description = "根据ID查询学生")
     @GetMapping("/{sid}")
     public ApiResponse<Student> getById(@PathVariable Long sid) {
         Student student = studentService.getStudentById(sid);
@@ -44,6 +47,7 @@ public class StudentController {
     /**
      * 根据学号查询学生
      */
+    @Log(module = "学生管理", type = "查询", description = "根据学号查询学生")
     @GetMapping("/no/{sno}")
     public ApiResponse<Student> getByNo(@PathVariable String sno) {
         Student student = studentService.getStudentByNo(sno);
@@ -53,6 +57,7 @@ public class StudentController {
     /**
      * 新增学生
      */
+    @Log(module = "学生管理", type = "新增", description = "新增学生信息")
     @PostMapping
     public ApiResponse<Void> add(@RequestBody @Valid Student student) {
         studentService.addStudent(student);
@@ -63,6 +68,7 @@ public class StudentController {
     /**
      * 更新学生信息
      */
+    @Log(module = "学生管理", type = "修改", description = "更新学生信息")
     @PutMapping("/{sid}")
     public ApiResponse<Void> update(@PathVariable Long sid, @RequestBody @Valid Student student) {
         student.setSid(sid);
@@ -74,6 +80,7 @@ public class StudentController {
     /**
      * 删除学生
      */
+    @Log(module = "学生管理", type = "删除", description = "删除学生")
     @DeleteMapping("/{sid}")
     public ApiResponse<Void> delete(@PathVariable Long sid) {
         studentService.deleteStudent(sid);
