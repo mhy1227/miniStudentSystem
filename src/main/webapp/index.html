@@ -2,8 +2,9 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>学生信息管理系统</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.2.3/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <style>
         .nav-menu {
@@ -16,22 +17,74 @@
             border: 1px solid #ccc;
             border-radius: 3px;
         }
+        #userInfo {
+            position: absolute;
+            top: 10px;
+            right: 100px;
+        }
+        #logoutBtn {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+        }
     </style>
 </head>
 <body>
+    <!-- 用户信息和退出按钮 -->
+    <div id="userInfo">欢迎，<span id="userName">同学</span></div>
+    <button id="logoutBtn" class="btn btn-sm btn-outline-secondary">退出</button>
+
     <div class="container">
         <h1>学生信息管理系统</h1>
-        <nav class="menu">
+        <nav class="nav-menu">
             <a href="student.html" class="menu-item">学生管理</a>
             <a href="course.html" class="menu-item">课程管理</a>
             <a href="student-course.html" class="menu-item">选课管理</a>
             <a href="grade.html" class="menu-item">成绩管理</a>
         </nav>
     </div>
-    
-    <div>
+
+    <div class="container">
         <h2>欢迎使用学生管理系统</h2>
         <p>请选择上方菜单进行操作</p>
     </div>
+
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // 获取当前用户信息
+            $.ajax({
+                url: '/api/auth/current-user',
+                type: 'GET',
+                headers: {
+                    'Accept': 'application/json'
+                },
+                success: function(response) {
+                    if (response.code === 200 && response.data) {
+                        $('#userName').text(response.data.name);
+                    } else {
+                        window.location.href = '/login.html';
+                    }
+                },
+                error: function() {
+                    window.location.href = '/login.html';
+                }
+            });
+
+            // 退出登录
+            $('#logoutBtn').click(function() {
+                $.ajax({
+                    url: '/api/auth/logout',
+                    type: 'POST',
+                    headers: {
+                        'Accept': 'application/json'
+                    },
+                    success: function() {
+                        window.location.href = '/login.html';
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html> 
