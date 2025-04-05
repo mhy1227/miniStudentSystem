@@ -29,7 +29,9 @@ public class LoginServiceImpl implements LoginService {
     public LoginUserVO login(LoginVO loginVO, HttpSession session) {
         // 1. 检查账号是否锁定
         if (isAccountLocked(loginVO.getSno(), session)) {
-            throw new RuntimeException("账号已锁定，请15分钟后再试");
+            LocalDateTime lockTime = (LocalDateTime) session.getAttribute(LoginConstants.SESSION_LOCK_TIME_KEY);
+            long remainingMinutes = LoginConstants.LOCK_TIME_MINUTES - ChronoUnit.MINUTES.between(lockTime, LocalDateTime.now());
+            throw new RuntimeException("账号已锁定，请" + remainingMinutes + "分钟后再试");
         }
 
         // 2. 查询学生信息
@@ -51,7 +53,7 @@ public class LoginServiceImpl implements LoginService {
                 // 设置锁定时间
                 LocalDateTime lockTime = LocalDateTime.now();
                 session.setAttribute(LoginConstants.SESSION_LOCK_TIME_KEY, lockTime);
-                throw new RuntimeException("密码错误次数过多，账号已锁定，请15分钟后再试");
+                throw new RuntimeException("密码错误次数过多，账号已锁定，请" + LoginConstants.LOCK_TIME_MINUTES + "分钟后再试");
             }
             
             throw new RuntimeException("密码错误，还剩" + (LoginConstants.MAX_ERROR_COUNT - errorCount) + "次机会");
@@ -103,7 +105,6 @@ public class LoginServiceImpl implements LoginService {
                 loginMapper.updateLoginErrorCount(sno, 0);
                 return false;
             }
-            // 还在锁定时间内
             return true;
         }
 
@@ -111,11 +112,10 @@ public class LoginServiceImpl implements LoginService {
         Student student = loginMapper.getStudentBySno(sno);
         if (student != null && student.getLoginErrorCount() != null && 
             student.getLoginErrorCount() >= LoginConstants.MAX_ERROR_COUNT) {
-            // 如果数据库中的错误次数达到上限，但session中没有锁定时间，说明是新的锁定
-            // 设置锁定时间为当前时间
-            session.setAttribute(LoginConstants.SESSION_LOCK_TIME_KEY, LocalDateTime.now());
-            session.setAttribute(LoginConstants.SESSION_ERROR_COUNT_KEY, student.getLoginErrorCount());
-            return true;
+            // 如果数据库中的错误次数达到上限，但session中没有锁定时间
+            // 说明是新的会话，需要重置错误次数（因为可能已经过了锁定时间）
+            loginMapper.updateLoginErrorCount(sno, 0);
+            return false;
         }
 
         return false;
