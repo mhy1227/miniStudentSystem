@@ -44,14 +44,14 @@ public class LoginServiceImpl implements LoginService {
             int errorCount = (student.getLoginErrorCount() == null ? 0 : student.getLoginErrorCount()) + 1;
             loginMapper.updateLoginErrorCount(loginVO.getSno(), errorCount);
             
-            // 同时更新session中的错误次数和锁定时间
+            // 同时更新session中的错误次数
             session.setAttribute(LoginConstants.SESSION_ERROR_COUNT_KEY, errorCount);
             
             if (errorCount >= LoginConstants.MAX_ERROR_COUNT) {
                 // 设置锁定时间
                 LocalDateTime lockTime = LocalDateTime.now();
                 session.setAttribute(LoginConstants.SESSION_LOCK_TIME_KEY, lockTime);
-                throw new RuntimeException("密码错误次数过多，账号已锁定");
+                throw new RuntimeException("密码错误次数过多，账号已锁定，请15分钟后再试");
             }
             
             throw new RuntimeException("密码错误，还剩" + (LoginConstants.MAX_ERROR_COUNT - errorCount) + "次机会");
