@@ -27,5 +27,5 @@ public class LoginConstants {
     /**
      * 锁定时间（分钟）
      */
-    public static final int LOCK_TIME_MINUTES = 15;
+    public static final int LOCK_TIME_MINUTES = 1; // 改为1分钟，方便测试
 } 

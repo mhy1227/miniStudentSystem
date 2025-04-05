@@ -103,6 +103,7 @@ public class LoginServiceImpl implements LoginService {
                 loginMapper.updateLoginErrorCount(sno, 0);
                 return false;
             }
+            // 还在锁定时间内
             return true;
         }
 
@@ -110,7 +111,8 @@ public class LoginServiceImpl implements LoginService {
         Student student = loginMapper.getStudentBySno(sno);
         if (student != null && student.getLoginErrorCount() != null && 
             student.getLoginErrorCount() >= LoginConstants.MAX_ERROR_COUNT) {
-            // 如果数据库中的错误次数达到上限，设置session锁定状态
+            // 如果数据库中的错误次数达到上限，但session中没有锁定时间，说明是新的锁定
+            // 设置锁定时间为当前时间
             session.setAttribute(LoginConstants.SESSION_LOCK_TIME_KEY, LocalDateTime.now());
             session.setAttribute(LoginConstants.SESSION_ERROR_COUNT_KEY, student.getLoginErrorCount());
             return true;
