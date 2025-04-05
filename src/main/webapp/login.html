@@ -157,17 +157,22 @@
                         if (response.code === 200) {
                             window.location.href = 'index.html';
                         } else {
-                            showError(response.msg || '登录失败，请检查学号和密码');
+                            showError(response.message);
                             // 登录失败时刷新验证码
                             generateCaptcha();
                             $('#captcha').val('');
+                            // 清空密码输入框
+                            $('#pwd').val('');
                         }
                     },
-                    error: function() {
-                        showError('登录请求失败，请稍后重试');
+                    error: function(xhr) {
+                        const response = xhr.responseJSON;
+                        showError(response ? response.message : '登录请求失败，请稍后重试');
                         // 请求失败时刷新验证码
                         generateCaptcha();
                         $('#captcha').val('');
+                        // 清空密码输入框
+                        $('#pwd').val('');
                     },
                     complete: function() {
                         // 恢复提交按钮
