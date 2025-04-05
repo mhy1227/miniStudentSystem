@@ -71,9 +71,12 @@ public class LoginServiceImpl implements LoginService {
 
     @Override
     public void logout(HttpSession session) {
+        // 清除所有session属性
         session.removeAttribute(LoginConstants.SESSION_USER_KEY);
         session.removeAttribute(LoginConstants.SESSION_ERROR_COUNT_KEY);
         session.removeAttribute(LoginConstants.SESSION_LOCK_TIME_KEY);
+        // 使session失效
+        session.invalidate();
     }
 
     @Override

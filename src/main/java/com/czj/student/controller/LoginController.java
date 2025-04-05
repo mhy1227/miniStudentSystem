@@ -7,6 +7,9 @@ import com.czj.student.service.LoginService;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
 
@@ -33,8 +36,20 @@ public class LoginController {
      * 退出登录
      */
     @PostMapping("/logout")
-    public ApiResponse<Void> logout(HttpSession session) {
+    public ApiResponse<Void> logout(HttpSession session, HttpServletRequest request, HttpServletResponse response) {
+        // 清除服务器端session
         loginService.logout(session);
+        
+        // 清除客户端cookie
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                cookie.setMaxAge(0);
+                cookie.setPath("/");
+                response.addCookie(cookie);
+            }
+        }
+        
         return ApiResponse.success();
     }
 
