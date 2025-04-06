@@ -52,4 +52,19 @@ public class Student {
      * 更新时间
      */
     private Date updatedTime;
+
+    /**
+     * 登录密码
+     */
+    private String pwd;
+
+    /**
+     * 登录错误次数
+     */
+    private Integer loginErrorCount;
+
+    /**
+     * 最后登录时间
+     */
+    private Date lastLoginTime;
 } 

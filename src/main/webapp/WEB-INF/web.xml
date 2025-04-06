@@ -75,4 +75,24 @@
         <filter-name>DruidWebStatFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
+
+    <!-- 欢迎页面配置 -->
+    <welcome-file-list>
+        <welcome-file>login.html</welcome-file>
+    </welcome-file-list>
+
+    <!-- Session配置 -->
+    <session-config>
+        <!-- session超时时间（分钟） -->
+        <session-timeout>30</session-timeout>
+        <!-- cookie配置 -->
+        <cookie-config>
+            <http-only>true</http-only>
+            <secure>false</secure>
+            <max-age>1800</max-age>
+        </cookie-config>
+        <!-- 跟踪模式 -->
+        <tracking-mode>COOKIE</tracking-mode>
+    </session-config>
+
 </web-app>
