@@ -53,20 +53,23 @@
     <script src="js/bootstrap/js/bootstrap.min.js"></script>
     <script>
         $(document).ready(function() {
-            // 获取当前用户信息
+            // 获取当前用户信息（只用于显示用户名）
             $.ajax({
                 url: '/api/auth/current-user',
                 type: 'GET',
                 success: function(response) {
                     if (response.code === 200 && response.data) {
                         $('#userName').text(response.data.name);
-                    } else {
-                        window.location.href = 'login.html';
                     }
-                },
-                error: function() {
-                    window.location.href = 'login.html';
+                    // 移除登录检查，现在由拦截器统一处理
+                    // else {
+                    //     window.location.href = 'login.html';
+                    // }
                 }
+                // 移除error处理，现在由拦截器统一处理
+                // error: function() {
+                //     window.location.href = 'login.html';
+                // }
             });
 
             // 退出登录
@@ -79,10 +82,7 @@
                     type: 'POST',
                     success: function(response) {
                         if (response.code === 200) {
-                            // 等待一小段时间确保session已清除
-                            setTimeout(function() {
-                                window.location.replace('login.html');
-                            }, 100);
+                            window.location.replace('login.html');
                         } else {
                             alert('退出失败，请重试');
                             // 恢复按钮状态
