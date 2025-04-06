@@ -1,4 +1,4 @@
-package com.student.session;
+package com.czj.student.session;
 
 import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;

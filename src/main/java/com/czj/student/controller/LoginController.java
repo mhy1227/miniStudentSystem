@@ -4,8 +4,9 @@ import com.czj.student.common.ApiResponse;
 import com.czj.student.model.vo.LoginVO;
 import com.czj.student.model.vo.LoginUserVO;
 import com.czj.student.service.LoginService;
-import com.student.session.SessionManager;
-import com.student.session.IpUtil;
+import com.czj.student.session.IpUtil;
+import com.czj.student.session.SessionManager;
+
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;

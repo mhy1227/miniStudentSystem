@@ -3,7 +3,7 @@ package com.czj.student.interceptor;
 import com.czj.student.common.ApiResponse;
 import com.czj.student.common.LoginConstants;
 import com.czj.student.model.vo.LoginUserVO;
-import com.student.session.SessionManager;
+import com.czj.student.session.SessionManager;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.web.servlet.HandlerInterceptor;
 import javax.annotation.Resource;

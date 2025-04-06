@@ -47,12 +47,8 @@
         }
         .error-message {
             display: none;
-            color: #dc3545;
             margin-top: 10px;
-            padding: 10px;
-            border: 1px solid #dc3545;
-            border-radius: 4px;
-            background-color: #f8d7da;
+            margin-bottom: 15px;
         }
     </style>
 </head>
@@ -60,7 +56,7 @@
     <div class="container">
         <div class="login-container">
             <h2 class="login-title">学生管理系统</h2>
-            <div id="errorMessage" class="error-message"></div>
+            <div id="errorMessage" class="alert alert-danger error-message" role="alert"></div>
             <form id="loginForm">
                 <div class="form-group">
                     <label for="sno">学号：</label>
@@ -91,6 +87,7 @@
 
         // 显示错误信息
         function showError(message) {
+            // Bootstrap Alert方式
             const errorDiv = $('#errorMessage');
             errorDiv.text(message);
             
@@ -110,6 +107,9 @@
                 }, 3000);
                 errorDiv.data('fadeOutTimer', timer);
             }
+
+            // 原生alert方式（已注释）
+            // alert(message);
         }
 
         // 生成验证码
