@@ -38,10 +38,90 @@ ADD COLUMN login_count INT DEFAULT 0 COMMENT '登录次数' AFTER last_login_tim
 - 获取当前登录用户信息
 
 ### 2. 业务规则
-- 连续失败5次锁定账号
+- 连续失败3次锁定账号
 - 30分钟内未操作自动退出
 - 同一账号不允许多处登录
 - 密码必须包含字母和数字
+
+### 3. 响应封装设计
+#### 3.1 双层响应封装
+使用双层响应封装，实现HTTP协议规范和业务响应统一：
+
+1. 内层封装（ApiResponse）：
+```java
+public class ApiResponse<T> {
+    private int code;        // 业务状态码
+    private String message;  // 业务消息
+    private T data;         // 业务数据
+}
+```
+
+2. 外层封装（ResponseEntity）：
+```java
+ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+    .body(ApiResponse.error("错误信息"))
+```
+
+#### 3.2 状态码对应关系
+| 场景 | HTTP状态码 | 业务状态码 | 说明 |
+|-----|------------|-----------|------|
+| 成功 | 200 | 200 | 请求成功 |
+| 参数错误 | 400 | 400 | 请求参数验证失败 |
+| 未授权 | 401 | 401 | 未登录或会话过期 |
+| 权限不足 | 403 | 403 | 无权访问 |
+| 业务异常 | 500 | 500 | 如密码错误、账号锁定等 |
+| 系统异常 | 500 | 500 | 未知的系统错误 |
+
+#### 3.3 响应示例
+1. 登录成功：
+```json
+HTTP/1.1 200 OK
+{
+    "code": 200,
+    "message": "success",
+    "data": {
+        "sno": "XH000001",
+        "name": "张三"
+    }
+}
+```
+
+2. 密码错误：
+```json
+HTTP/1.1 500 Internal Server Error
+{
+    "code": 500,
+    "message": "密码错误，还剩2次机会",
+    "data": null
+}
+```
+
+3. 参数错误：
+```json
+HTTP/1.1 400 Bad Request
+{
+    "code": 400,
+    "message": "参数校验失败：学号不能为空",
+    "data": null
+}
+```
+
+#### 3.4 前端处理
+```javascript
+$.ajax({
+    success: function(response) {
+        // 只处理成功响应
+        window.location.replace('index.html');
+    },
+    error: function(xhr) {
+        // 处理错误响应
+        const response = xhr.responseJSON;
+        if (response && response.message) {
+            showError(response.message);
+        }
+    }
+});
+```
 
 ## 四、前端设计
 ### 1. 页面规划
