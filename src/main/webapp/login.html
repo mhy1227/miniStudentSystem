@@ -93,10 +93,23 @@
         function showError(message) {
             const errorDiv = $('#errorMessage');
             errorDiv.text(message);
-            errorDiv.fadeIn();
-            setTimeout(() => {
-                errorDiv.fadeOut();
-            }, 3000);
+            
+            // 清除可能存在的淡出定时器
+            if (errorDiv.data('fadeOutTimer')) {
+                clearTimeout(errorDiv.data('fadeOutTimer'));
+                errorDiv.data('fadeOutTimer', null);
+            }
+            
+            // 显示错误信息
+            errorDiv.stop(true, true).show();
+            
+            // 如果不是密码错误或账号锁定的消息，3秒后自动隐藏
+            if (!message.includes('密码错误') && !message.includes('账号已锁定')) {
+                const timer = setTimeout(() => {
+                    errorDiv.fadeOut();
+                }, 3000);
+                errorDiv.data('fadeOutTimer', timer);
+            }
         }
 
         // 生成验证码
