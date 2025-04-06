@@ -143,6 +143,12 @@
             $('#loginForm').on('submit', function(e) {
                 e.preventDefault();
                 
+                // 如果按钮已经禁用，说明正在提交中，直接返回
+                const submitBtn = $(this).find('button[type="submit"]');
+                if (submitBtn.prop('disabled')) {
+                    return;
+                }
+                
                 // 验证码检查
                 const userAnswer = parseInt($('#captcha').val());
                 if (userAnswer !== captchaResult) {
@@ -158,7 +164,6 @@
                 };
 
                 // 禁用提交按钮
-                const submitBtn = $(this).find('button[type="submit"]');
                 submitBtn.prop('disabled', true).text('登录中...');
 
                 $.ajax({
@@ -167,19 +172,15 @@
                     contentType: 'application/json',
                     data: JSON.stringify(loginData),
                     success: function(response) {
-                        if (response.code === 200) {
-                            window.location.href = 'index.html';
-                        } else {
-                            showError(response.message);
-                            // 登录失败时刷新验证码
-                            generateCaptcha();
-                            $('#captcha').val('');
-                            // 清空密码输入框
-                            $('#pwd').val('');
-                        }
+                        window.location.replace('index.html');
                     },
                     error: function(xhr) {
-                        showError('登录请求失败，请稍后重试');
+                        const response = xhr.responseJSON;
+                        if (response && response.message) {
+                            showError(response.message);
+                        } else {
+                            showError('登录请求失败，请稍后重试');
+                        }
                         // 登录失败时刷新验证码
                         generateCaptcha();
                         $('#captcha').val('');
