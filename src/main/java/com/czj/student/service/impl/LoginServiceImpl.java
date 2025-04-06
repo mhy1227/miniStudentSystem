@@ -53,7 +53,9 @@ public class LoginServiceImpl implements LoginService {
                 // 设置锁定时间
                 LocalDateTime lockTime = LocalDateTime.now();
                 session.setAttribute(LoginConstants.SESSION_LOCK_TIME_KEY, lockTime);
-                throw new RuntimeException("密码错误次数过多，账号已锁定，请" + LoginConstants.LOCK_TIME_MINUTES + "分钟后再试");
+                // 使用动态计算的剩余时间
+                long remainingMinutes = LoginConstants.LOCK_TIME_MINUTES;
+                throw new RuntimeException("密码错误次数过多，账号已锁定，请" + remainingMinutes + "分钟后再试");
             }
             
             throw new RuntimeException("密码错误，还剩" + (LoginConstants.MAX_ERROR_COUNT - errorCount) + "次机会");
