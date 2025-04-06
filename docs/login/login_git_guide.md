@@ -197,6 +197,7 @@ git push
    git push
    ```
 
+
 3. 分支命名规范：
    - 功能分支：feature/xxx
    - 修复分支：fix/xxx
@@ -206,3 +207,45 @@ git push
    - 如果推送失败，检查远程仓库地址
    - 检查是否有权限推送
    - 检查分支名称是否正确 
+
+## 异地登录功能分支合并
+```
+# 1. 确保当前分支的所有更改都已提交
+git add .
+git commit -m "feat: 完成异地登录检测功能
+
+1. 核心功能实现
+- 添加SessionManager实现会话管理
+- 添加IpUtil工具类处理IP地址
+- 添加SessionConfig支持定时任务
+
+2. 系统集成
+- 改造LoginController支持异地登录检测
+- 增强LoginInterceptor添加会话验证
+- 优化登录页面错误提示
+
+3. 文档完善
+- 添加异地登录检测方案文档
+- 更新实现进度文档
+- 添加测试指南文档
+
+4. 功能特性
+- 支持异地登录检测
+- 自动清理过期会话
+- 友好的错误提示
+- 完整的日志记录"
+
+# 2. 切换到main分支并更新
+git checkout main
+git pull origin main
+
+# 3. 合并功能分支
+git merge feature/session-detection
+
+# 4. 推送到远程仓库
+git push origin main
+
+# 5. （可选）删除功能分支
+git branch -d feature/session-detection
+git push origin --delete feature/session-detection
+```
