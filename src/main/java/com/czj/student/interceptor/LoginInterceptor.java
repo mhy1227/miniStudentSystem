@@ -3,8 +3,10 @@ package com.czj.student.interceptor;
 import com.czj.student.common.ApiResponse;
 import com.czj.student.common.LoginConstants;
 import com.czj.student.model.vo.LoginUserVO;
+import com.student.session.SessionManager;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.web.servlet.HandlerInterceptor;
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.PrintWriter;
@@ -15,6 +17,9 @@ import java.io.PrintWriter;
 public class LoginInterceptor implements HandlerInterceptor {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
+    
+    @Resource
+    private SessionManager sessionManager;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -28,24 +33,37 @@ public class LoginInterceptor implements HandlerInterceptor {
         
         // 3. 检查是否已登录
         LoginUserVO loginUser = (LoginUserVO) request.getSession().getAttribute(LoginConstants.SESSION_USER_KEY);
-        if (loginUser != null) {
-            return true;
+        if (loginUser == null) {
+            handleUnauthorized(request, response);
+            return false;
         }
         
-        // 4. 未登录处理
-        // 4.1 判断是否是AJAX请求
+        // 4. 验证会话是否有效（检查异地登录）
+        if (!sessionManager.isValidSession(loginUser.getSno(), request.getSession().getId())) {
+            handleUnauthorized(request, response, "您的账号已在其他地方登录");
+            return false;
+        }
+        
+        return true;
+    }
+    
+    /**
+     * 处理未授权的请求
+     */
+    private void handleUnauthorized(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        handleUnauthorized(request, response, "未登录或会话已过期");
+    }
+    
+    private void handleUnauthorized(HttpServletRequest request, HttpServletResponse response, String message) throws Exception {
         if (isAjaxRequest(request)) {
             response.setContentType("application/json;charset=UTF-8");
             PrintWriter writer = response.getWriter();
-            writer.write(objectMapper.writeValueAsString(ApiResponse.error(401, "未登录或会话已过期")));
+            writer.write(objectMapper.writeValueAsString(ApiResponse.error(401, message)));
             writer.flush();
             writer.close();
         } else {
-            // 4.2 普通请求重定向到登录页
             response.sendRedirect("/login.html");
         }
-        
-        return false;
     }
     
     /**
