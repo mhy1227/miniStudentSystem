@@ -180,7 +180,7 @@
                     },
                     error: function(xhr) {
                         showError('登录请求失败，请稍后重试');
-                        // 请求失败时刷新验证码
+                        // 登录失败时刷新验证码
                         generateCaptcha();
                         $('#captcha').val('');
                         // 清空密码输入框
