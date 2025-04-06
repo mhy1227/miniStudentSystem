@@ -108,4 +108,101 @@ git commit -m "feat: 添加登录功能前端代码
 4. **测试完善阶段**
    - 测试用例提交
    - Bug修复提交
-   - 文档更新提交 
+   - 文档更新提交
+
+## 六、Git推送说明
+### 1. 推送命令格式
+```bash
+# 完整格式
+git push <remote> <branch>
+
+# 设置上游分支并推送
+git push -u <remote> <branch>
+
+# 简化推送（需要先设置过上游分支）
+git push
+```
+
+### 2. 分支关联说明
+1. **首次推送新分支**
+   ```bash
+   # 第一次推送feature-login分支
+   git push -u origin feature-login
+   ```
+   - `-u` 或 `--set-upstream` 用于设置上游分支
+   - 设置后，本地分支会与远程分支建立关联
+   - 这个操作只需要做一次
+
+2. **切换分支后推送**
+   - 如果是首次推送该分支，需要设置关联：
+     ```bash
+     git checkout feature-login
+     git push -u origin feature-login
+     ```
+   - 如果之前已经设置过关联：
+     ```bash
+     git checkout feature-login
+     git push
+     ```
+
+3. **查看分支关联状态**
+   ```bash
+   # 查看本地分支与远程分支的关联
+   git branch -vv
+   
+   # 查看所有分支信息
+   git branch -a
+   ```
+
+### 3. 最佳实践
+1. **创建新分支时**
+   ```bash
+   # 从main分支创建并切换到新分支
+   git checkout -b feature-login
+   
+   # 首次推送时设置关联
+   git push -u origin feature-login
+   ```
+
+2. **日常开发推送**
+   ```bash
+   # 添加修改
+   git add .
+   
+   # 提交修改
+   git commit -m "fix: 修复xxx问题"
+   
+   # 推送到远程
+   git push
+   ```
+
+3. **多分支协作时**
+   - 切换分支前先提交或暂存当前修改
+   - 切换到新分支后第一次推送要设置关联
+   - 使用 `git status` 检查分支状态
+   - 使用 `git branch -vv` 检查分支关联
+
+### 4. 注意事项
+1. 推送前先拉取最新代码：
+   ```bash
+   git pull
+   ```
+
+2. 解决冲突后再推送：
+   ```bash
+   git pull
+   # 解决冲突
+   git add .
+   git commit -m "fix: 解决冲突"
+   git push
+   ```
+
+3. 分支命名规范：
+   - 功能分支：feature/xxx
+   - 修复分支：fix/xxx
+   - 版本分支：release/xxx
+
+4. 错误处理：
+   - 如果推送失败，检查远程仓库地址
+   - 检查是否有权限推送
+   - 检查分支名称是否正确 
