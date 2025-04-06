@@ -100,8 +100,10 @@
             // 显示错误信息
             errorDiv.stop(true, true).show();
             
-            // 如果不是密码错误或账号锁定的消息，3秒后自动隐藏
-            if (!message.includes('密码错误') && !message.includes('账号已锁定')) {
+            // 如果不是密码错误、账号锁定或异地登录的消息，3秒后自动隐藏
+            if (!message.includes('密码错误') && 
+                !message.includes('账号已锁定') && 
+                !message.includes('该账号已在其他地方登录')) {
                 const timer = setTimeout(() => {
                     errorDiv.fadeOut();
                 }, 3000);
@@ -172,7 +174,16 @@
                     contentType: 'application/json',
                     data: JSON.stringify(loginData),
                     success: function(response) {
-                        window.location.replace('index.html');
+                        if (response.code === 200) {
+                            window.location.replace('index.html');
+                        } else {
+                            showError(response.message || '登录失败，请稍后重试');
+                            // 登录失败时刷新验证码
+                            generateCaptcha();
+                            $('#captcha').val('');
+                            // 清空密码输入框
+                            $('#pwd').val('');
+                        }
                     },
                     error: function(xhr) {
                         const response = xhr.responseJSON;
