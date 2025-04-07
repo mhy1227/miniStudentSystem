@@ -93,12 +93,16 @@ public class SessionPool {
     /**
      * 获取会话
      */
-    public UserSession borrowSession(String sno) throws SessionException {
+    public UserSession borrowSession(String sno, String sessionId) throws SessionException {
         checkPoolState();
         if (sno == null || sno.trim().isEmpty()) {
             throw new IllegalArgumentException("sno cannot be null or empty");
         }
+        if (sessionId == null || sessionId.trim().isEmpty()) {
+            throw new IllegalArgumentException("sessionId cannot be null or empty");
+        }
         
+        UserSession session = null;
         sessionLock.lock();
         try {
             // 1. 检查是否已存在会话
@@ -123,26 +127,32 @@ public class SessionPool {
                     throw new SessionException("会话池已满");
                 }
                 
-                // 4. 尝试从空闲池获取
-                UserSession session = idlePool.poll();
-                
-                // 5. 如果没有空闲会话，创建新的
+                // 4. 尝试从空闲池获取或创建新会话
+                session = idlePool.poll();
                 if (session == null) {
                     session = createSession();
                 }
                 
-                // 6. 初始化会话
-                initializeSession(session, sno);
-                
-                // 7. 添加到活跃池和映射
+                // 5. 初始化会话，使用传入的sessionId
+                session.reset(); // 确保会话状态干净
+                session.setInPool(true);
+                session.setSno(sno);
+                session.setSessionId(sessionId); // 使用传入的sessionId
+                // 添加到活跃池和映射中
                 activePool.put(session.getSessionId(), session);
                 snoToSessionId.put(sno, session.getSessionId());
+                session.setCreateTime(System.currentTimeMillis());
+                session.setLastAccessTime(System.currentTimeMillis());
+                session.touch();
                 
-                // 8. 更新统计信息
+                // 6. 更新借用计数
                 borrowedCount.incrementAndGet();
                 
                 return session;
             } catch (Exception e) {
+                if (session != null) {
+                    discardSession(session);
+                }
                 semaphore.release();
                 throw new SessionException("获取会话失败", e);
             }
@@ -152,19 +162,6 @@ public class SessionPool {
         } finally {
             sessionLock.unlock();
         }
-    }
-    
-    /**
-     * 初始化会话
-     */
-    private void initializeSession(UserSession session, String sno) {
-        session.reset(); // 确保会话状态干净
-        session.setInPool(true);
-        session.setSno(sno);
-        session.setSessionId(generateSessionId());
-        session.setCreateTime(System.currentTimeMillis());
-        session.setLastAccessTime(System.currentTimeMillis());
-        session.touch();
     }
     
     /**
@@ -294,17 +291,57 @@ public class SessionPool {
      * 检查会话是否有效
      */
     public boolean isValidSession(String sno, String sessionId) {
-        if (sno == null || sessionId == null) {
-            return false;
+        sessionLock.lock();
+        try {
+            // 1. 先检查映射关系
+            String mappedSessionId = snoToSessionId.get(sno);
+            if (mappedSessionId == null) {
+                logger.debug("学号[{}]未找到会话映射", sno);
+                return false;
+            }
+            
+            // 2. 检查会话ID是否匹配
+            if (!mappedSessionId.equals(sessionId)) {
+                logger.debug("学号[{}]的会话ID不匹配 - 期望: {}, 实际: {}", 
+                    sno, mappedSessionId, sessionId);
+                return false;
+            }
+            
+            // 3. 获取并验证会话
+            UserSession session = activePool.get(sessionId);
+            if (session == null) {
+                logger.debug("会话ID[{}]在活跃池中未找到", sessionId);
+                // 清理不一致的映射
+                snoToSessionId.remove(sno);
+                return false;
+            }
+            
+            // 4. 检查会话是否过期
+            if (isSessionExpired(session)) {
+                logger.debug("会话[{}]已过期", sessionId);
+                // 清理过期会话
+                removeExpiredSession(session);
+                return false;
+            }
+            
+            // 5. 更新最后访问时间
+            session.touch();
+            return true;
+        } finally {
+            sessionLock.unlock();
         }
-        
-        String currentSessionId = snoToSessionId.get(sno);
-        if (currentSessionId == null || !currentSessionId.equals(sessionId)) {
-            return false;
+    }
+    
+    private void removeExpiredSession(UserSession session) {
+        if (session != null) {
+            String sno = session.getSno();
+            String sessionId = session.getSessionId();
+            activePool.remove(sessionId);
+            snoToSessionId.remove(sno);
+            session.reset();
+            idlePool.offer(session);
+            semaphore.release(); // 释放信号量
         }
-        
-        UserSession session = activePool.get(sessionId);
-        return isSessionValid(session);
     }
     
     /**
@@ -330,17 +367,9 @@ public class SessionPool {
      */
     private UserSession createSession() {
         UserSession session = new UserSession();
-        session.setSessionId(generateSessionId());
         session.setLastAccessTime(System.currentTimeMillis());
         createdCount.incrementAndGet();
         return session;
-    }
-    
-    /**
-     * 生成会话ID
-     */
-    private String generateSessionId() {
-        return UUID.randomUUID().toString();
     }
     
     /**
@@ -473,5 +502,13 @@ public class SessionPool {
         }
         
         logger.info("Session pool shutdown completed");
+    }
+    
+    /**
+     * 验证会话是否过期
+     */
+    private boolean isSessionExpired(UserSession session) {
+        return session == null || 
+               System.currentTimeMillis() - session.getLastAccessTime() > sessionTimeout;
     }
 } 

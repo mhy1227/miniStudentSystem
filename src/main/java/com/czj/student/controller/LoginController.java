@@ -34,20 +34,20 @@ public class LoginController {
      */
     @PostMapping("/login")
     public ApiResponse<LoginUserVO> login(@RequestBody @Valid LoginVO loginVO, HttpSession session, HttpServletRequest request) {
-        // 1. 获取IP地址
         String ip = IpUtil.getIpAddress(request);
+        String sessionId = session.getId();
         
-        // 2. 检查是否允许登录（异地登录检测）
-        if (!sessionManager.login(loginVO.getSno(), session.getId(), ip)) {
-            return ApiResponse.error("该账号已在其他地方登录，IP: " + sessionManager.getCurrentLoginIp(loginVO.getSno()));
+        // 1. 先在SessionPool中检查和创建会话
+        if (!sessionManager.login(loginVO.getSno(), sessionId, ip)) {
+            return ApiResponse.error("该账号已在其他地方登录");
         }
         
         try {
-            // 3. 执行原有的登录逻辑
+            // 2. 再执行登录逻辑，设置HttpSession
             LoginUserVO loginUserVO = loginService.login(loginVO, session);
             return ApiResponse.success(loginUserVO);
         } catch (Exception e) {
-            // 4. 如果登录失败，清除会话记录
+            // 3. 如果登录失败，清理SessionPool中的会话
             sessionManager.logout(loginVO.getSno());
             throw e;
         }

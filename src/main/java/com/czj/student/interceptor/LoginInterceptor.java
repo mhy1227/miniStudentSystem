@@ -9,6 +9,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.PrintWriter;
 
 /**
@@ -31,15 +32,22 @@ public class LoginInterceptor implements HandlerInterceptor {
             return true;
         }
         
-        // 3. 检查是否已登录
-        LoginUserVO loginUser = (LoginUserVO) request.getSession().getAttribute(LoginConstants.SESSION_USER_KEY);
+        // 3. 检查HttpSession
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            handleUnauthorized(request, response);
+            return false;
+        }
+        
+        // 4. 获取用户信息
+        LoginUserVO loginUser = (LoginUserVO) session.getAttribute(LoginConstants.SESSION_USER_KEY);
         if (loginUser == null) {
             handleUnauthorized(request, response);
             return false;
         }
         
-        // 4. 验证会话是否有效（检查异地登录）
-        if (!sessionManager.isValidSession(loginUser.getSno(), request.getSession().getId())) {
+        // 5. 使用SessionPool验证会话
+        if (!sessionManager.isValidSession(loginUser.getSno(), session.getId())) {
             handleUnauthorized(request, response, "您的账号已在其他地方登录");
             return false;
         }

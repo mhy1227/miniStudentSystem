@@ -27,9 +27,20 @@
             right: 20px;
             cursor: pointer;
         }
+        #errorMessage {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+        }
     </style>
 </head>
 <body>
+    <!-- 错误提示 -->
+    <div id="errorMessage" class="alert alert-danger"></div>
+    
     <!-- 用户信息和退出按钮 -->
     <div id="userInfo">欢迎，<span id="userName">同学</span></div>
     <button id="logoutBtn" class="btn btn-sm btn-outline-secondary">退出</button>
@@ -52,28 +63,46 @@
     <script src="js/jquery/jquery.min.js"></script>
     <script src="js/bootstrap/js/bootstrap.min.js"></script>
     <script>
+        // 显示错误信息
+        function showError(message) {
+            const errorDiv = $('#errorMessage');
+            errorDiv.text(message).fadeIn();
+            setTimeout(() => errorDiv.fadeOut(), 3000);
+        }
+
         $(document).ready(function() {
-            // 获取当前用户信息（只用于显示用户名）
+            console.log('页面加载完成，准备获取用户信息');
+            
+            // 获取当前用户信息
             $.ajax({
                 url: '/api/auth/current-user',
                 type: 'GET',
                 success: function(response) {
-                    if (response.code === 200 && response.data) {
-                        $('#userName').text(response.data.name);
+                    console.log('获取当前用户信息:', response);
+                    if (response.code === 200) {
+                        const user = response.data;
+                        $('#userName').text(user.name);
+                        $('#welcome').text('欢迎, ' + user.name);
+                    } else {
+                        console.error('获取用户信息失败:', response.message);
+                        window.location.replace('login.html');
                     }
-                    // 移除登录检查，现在由拦截器统一处理
-                    // else {
-                    //     window.location.href = 'login.html';
-                    // }
+                },
+                error: function(xhr, status, error) {
+                    console.error('获取用户信息请求失败:', status, error);
+                    console.error('响应详情:', xhr.responseJSON);
+                    if (xhr.status === 401) {
+                        console.log('用户未登录或会话已过期');
+                        window.location.replace('login.html');
+                    } else {
+                        alert('系统错误，请稍后重试');
+                    }
                 }
-                // 移除error处理，现在由拦截器统一处理
-                // error: function() {
-                //     window.location.href = 'login.html';
-                // }
             });
 
             // 退出登录
             $('#logoutBtn').click(function() {
+                console.log('点击退出按钮');
                 // 禁用退出按钮，防止重复点击
                 $('#logoutBtn').prop('disabled', true).text('退出中...');
                 
@@ -81,16 +110,21 @@
                     url: '/api/auth/logout',
                     type: 'POST',
                     success: function(response) {
+                        console.log('退出响应:', response);
                         if (response.code === 200) {
-                            window.location.replace('login.html');
+                            // 添加延时确保会话完全清除
+                            setTimeout(function() {
+                                window.location.replace('login.html');
+                            }, 100);
                         } else {
-                            alert('退出失败，请重试');
+                            showError('退出失败，请重试');
                             // 恢复按钮状态
                             $('#logoutBtn').prop('disabled', false).text('退出');
                         }
                     },
-                    error: function() {
-                        alert('退出请求失败，请重试');
+                    error: function(xhr, status, error) {
+                        console.error('退出请求失败:', status, error);
+                        showError('退出请求失败，请重试');
                         // 恢复按钮状态
                         $('#logoutBtn').prop('disabled', false).text('退出');
                     }

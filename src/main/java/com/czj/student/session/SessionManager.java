@@ -1,12 +1,18 @@
 package com.czj.student.session;
 
 import java.util.Date;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.Map;
+import com.czj.student.session.pool.SessionPool;
+import com.czj.student.session.pool.UserSession;
+import com.czj.student.session.pool.SessionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import javax.annotation.Resource;
 import org.springframework.scheduling.annotation.Scheduled;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 会话管理器，用于处理用户登录会话
@@ -16,42 +22,16 @@ import org.springframework.scheduling.annotation.Scheduled;
 public class SessionManager {
     private static final Logger logger = LoggerFactory.getLogger(SessionManager.class);
     
-    // 存储用户会话信息
-    private static final Map<String, UserSession> sessionMap = new ConcurrentHashMap<>();
+    @Resource
+    private SessionPool sessionPool;
     
     // 会话超时时间（30分钟）
     private static final long SESSION_TIMEOUT = 30 * 60 * 1000;
     
-    /**
-     * 用户会话信息类
-     */
-    private static class UserSession {
-        private final String sno;          // 学号
-        private final String sessionId;    // 会话ID
-        private final String ip;           // 登录IP
-        private final Date loginTime;      // 登录时间
-        private volatile long lastAccessTime; // 最后访问时间
-        
-        private UserSession(String sno, String sessionId, String ip) {
-            this.sno = sno;
-            this.sessionId = sessionId;
-            this.ip = ip;
-            this.loginTime = new Date();
-            this.lastAccessTime = System.currentTimeMillis();
-        }
-        
-        // Getter方法
-        public String getSno() { return sno; }
-        public String getSessionId() { return sessionId; }
-        public String getIp() { return ip; }
-        public Date getLoginTime() { return loginTime; }
-        public long getLastAccessTime() { return lastAccessTime; }
-        
-        // 更新最后访问时间
-        public void updateAccessTime() {
-            this.lastAccessTime = System.currentTimeMillis();
-        }
-    }
+    private final Lock sessionLock = new ReentrantLock();
+    private final ConcurrentHashMap<String, UserSession> activePool = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, String> snoToSessionId = new ConcurrentHashMap<>();
+    private final AtomicInteger borrowedCount = new AtomicInteger();
     
     /**
      * 处理用户登录
@@ -62,22 +42,19 @@ public class SessionManager {
      */
     public boolean login(String sno, String sessionId, String ip) {
         try {
-            // 检查是否已经登录
-            UserSession existingSession = sessionMap.get(sno);
-            if (existingSession != null) {
-                logger.info("用户[{}]在IP[{}]尝试登录，但已在IP[{}]登录", 
-                    sno, ip, existingSession.getIp());
-                return false;
-            }
+            logger.info("尝试登录 - 学号: {}, 会话ID: {}, IP: {}", sno, sessionId, ip);
+            // 使用传入的sessionId(JSESSIONID)获取会话
+            UserSession session = sessionPool.borrowSession(sno, sessionId);
             
-            // 创建新会话
-            UserSession newSession = new UserSession(sno, sessionId, ip);
-            sessionMap.put(sno, newSession);
+            // 设置会话信息
+            session.setIp(ip);
+            session.setLoginTime(new Date());
+            
             logger.info("用户[{}]从IP[{}]登录成功", sno, ip);
             return true;
-            
-        } catch (Exception e) {
-            logger.error("处理用户[{}]登录时发生异常", sno, e);
+        } catch (SessionException e) {
+            logger.info("用户[{}]在IP[{}]尝试登录，但已在IP[{}]登录", 
+                sno, ip, sessionPool.getCurrentLoginIp(sno));
             return false;
         }
     }
@@ -87,9 +64,14 @@ public class SessionManager {
      * @param sno 学号
      */
     public void logout(String sno) {
-        UserSession session = sessionMap.remove(sno);
-        if (session != null) {
-            logger.info("用户[{}]从IP[{}]登出", sno, session.getIp());
+        try {
+            String ip = sessionPool.getCurrentLoginIp(sno);
+            sessionPool.invalidateSession(sno);
+            if (ip != null) {
+                logger.info("用户[{}]从IP[{}]登出", sno, ip);
+            }
+        } catch (Exception e) {
+            logger.error("处理用户[{}]登出时发生异常", sno, e);
         }
     }
     
@@ -99,12 +81,18 @@ public class SessionManager {
      * @return 是否成功踢出
      */
     public boolean forceLogout(String sno) {
-        UserSession session = sessionMap.remove(sno);
-        if (session != null) {
-            logger.info("强制用户[{}]从IP[{}]下线", sno, session.getIp());
-            return true;
+        try {
+            String ip = sessionPool.getCurrentLoginIp(sno);
+            sessionPool.invalidateSession(sno);
+            if (ip != null) {
+                logger.info("强制用户[{}]从IP[{}]下线", sno, ip);
+                return true;
+            }
+            return false;
+        } catch (Exception e) {
+            logger.error("强制用户[{}]下线时发生异常", sno, e);
+            return false;
         }
-        return false;
     }
     
     /**
@@ -114,21 +102,20 @@ public class SessionManager {
      * @return 是否有效
      */
     public boolean isValidSession(String sno, String sessionId) {
-        UserSession session = sessionMap.get(sno);
-        if (session != null) {
-            // 检查会话是否超时
-            if (System.currentTimeMillis() - session.getLastAccessTime() > SESSION_TIMEOUT) {
-                logout(sno);  // 超时自动登出
-                return false;
-            }
-            
-            boolean isValid = session.getSessionId().equals(sessionId);
+        try {
+            logger.debug("验证会话 - 学号: {}, 会话ID: {}", sno, sessionId);
+            boolean isValid = sessionPool.isValidSession(sno, sessionId);
             if (isValid) {
-                session.updateAccessTime();
+                sessionPool.updateSessionActivity(sno);
+                logger.debug("会话验证成功 - 学号: {}", sno);
+            } else {
+                logger.debug("会话验证失败 - 学号: {}", sno);
             }
             return isValid;
+        } catch (Exception e) {
+            logger.error("验证会话[{}]是否有效时发生异常", sessionId, e);
+            return false;
         }
-        return false;
     }
     
     /**
@@ -137,23 +124,14 @@ public class SessionManager {
      * @return IP地址，如果未登录则返回null
      */
     public String getCurrentLoginIp(String sno) {
-        UserSession session = sessionMap.get(sno);
-        return session != null ? session.getIp() : null;
+        return sessionPool.getCurrentLoginIp(sno);
     }
     
     /**
      * 定时清理过期会话
      */
-    @Scheduled(fixedRate = 30 * 60 * 1000)  // 每30分钟执行一次
+    @Scheduled(fixedDelay = 60000)  // 每分钟执行一次
     public void cleanExpiredSessions() {
-        long now = System.currentTimeMillis();
-        sessionMap.entrySet().removeIf(entry -> {
-            UserSession session = entry.getValue();
-            boolean isExpired = now - session.getLastAccessTime() > SESSION_TIMEOUT;
-            if (isExpired) {
-                logger.info("清理超时会话：用户[{}], IP[{}]", session.getSno(), session.getIp());
-            }
-            return isExpired;
-        });
+        sessionPool.maintain();  // 使用SessionPool的maintain方法进行维护
     }
 } 

@@ -128,15 +128,18 @@
 
             // 检查是否已登录，添加延时确保session已清除
             setTimeout(function() {
+                // 如果是从退出页面来的，不要检查登录状态
+                if (document.referrer.includes('index.html')) {
+                    console.log('从首页退出，跳过登录状态检查');
+                    return;
+                }
+                
                 $.ajax({
                     url: '/api/auth/current-user',
                     type: 'GET',
                     success: function(response) {
                         if (response.code === 200 && response.data) {
-                            // 如果是从退出页面来的，不要自动跳转
-                            if (!document.referrer.includes('index.html')) {
-                                window.location.href = 'index.html';
-                            }
+                            window.location.replace('index.html');
                         }
                     }
                 });
@@ -174,32 +177,32 @@
                     contentType: 'application/json',
                     data: JSON.stringify(loginData),
                     success: function(response) {
+                        console.log('登录响应:', response);  // 添加日志
                         if (response.code === 200) {
-                            window.location.replace('index.html');
+                            console.log('登录成功，准备跳转到首页');
+                            window.location.replace('index.html');  // 移除不必要的延时
                         } else {
+                            console.error('登录失败:', response.message);  // 添加错误日志
                             showError(response.message || '登录失败，请稍后重试');
-                            // 登录失败时刷新验证码
                             generateCaptcha();
                             $('#captcha').val('');
-                            // 清空密码输入框
                             $('#pwd').val('');
                         }
                     },
-                    error: function(xhr) {
+                    error: function(xhr, status, error) {
+                        console.error('登录请求失败:', status, error);  // 添加错误日志
+                        console.error('响应详情:', xhr.responseJSON);  // 添加响应详情
                         const response = xhr.responseJSON;
                         if (response && response.message) {
                             showError(response.message);
                         } else {
                             showError('登录请求失败，请稍后重试');
                         }
-                        // 登录失败时刷新验证码
                         generateCaptcha();
                         $('#captcha').val('');
-                        // 清空密码输入框
                         $('#pwd').val('');
                     },
                     complete: function() {
-                        // 恢复提交按钮
                         submitBtn.prop('disabled', false).text('登录');
                     }
                 });
