@@ -1,4 +1,75 @@
 # 学号池开发进度文档
+## 零、git创建学号池功能分支
+```
+# 1. 确保main分支是最新的
+git pull origin main
+
+# 2. 创建并切换到新的学号池功能分支
+git checkout -b feature/student-number-pool
+
+# 3. 添加已有的学号池文档
+git add docs/pool/student_number_pool_design.md docs/pool/student_number_pool_progress.md
+
+# 4. 提交这些文档
+git commit -m "docs: 添加学号池设计文档和开发进度计划"
+
+# 5. 推送新分支到远程仓库
+git push --set-upstream origin feature/student-number-pool
+```
+### 1.创建新功能分支
+```
+# 确保当前在main分支并且是最新状态
+git checkout main
+git pull origin main
+
+# 创建并切换到新的功能分支
+git checkout -b feature/student-number-pool
+```
+### 2.添加并提交设计文档
+```
+# 添加学号池设计文档和进度文档到暂存区
+git add docs/pool/student_number_pool_design.md docs/pool/student_number_pool_progress.md
+
+# 提交文档变更
+git commit -m "docs: 添加学号池设计文档和进度计划"
+
+# 推送分支到远程仓库
+git push --set-upstream origin feature/student-number-pool
+```
+### 3.分支开发流程
+```
+# 每次开发前同步main分支的最新变更
+git checkout main
+git pull origin main
+git checkout feature/student-number-pool
+git merge main
+
+# 进行开发...
+
+# 提交变更
+git add .
+git commit -m "feat: 实现XX功能"
+git push origin feature/student-number-pool
+```
+### 4.功能完成之后的合并
+```
+# 确保功能分支包含main的最新变更
+git checkout main
+git pull origin main
+git checkout feature/student-number-pool
+git merge main
+
+# 解决可能的冲突并提交
+
+# 切换到main并合并功能分支
+git checkout main
+git merge feature/student-number-pool
+git push origin main
+
+# 可选：删除功能分支
+git branch -d feature/student-number-pool
+git push origin --delete feature/student-number-pool
+```
 
 ## 一、当前状态
 
