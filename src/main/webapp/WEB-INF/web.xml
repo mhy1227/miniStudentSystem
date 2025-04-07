@@ -81,7 +81,7 @@
         <welcome-file>login.html</welcome-file>
     </welcome-file-list>
 
-    <!-- Session配置 -->
+    <!-- Web容器会话配置 -->
     <session-config>
         <!-- session超时时间（分钟） -->
         <session-timeout>30</session-timeout>
@@ -89,10 +89,36 @@
         <cookie-config>
             <http-only>true</http-only>
             <secure>false</secure>
-            <max-age>1800</max-age>
         </cookie-config>
         <!-- 跟踪模式 -->
         <tracking-mode>COOKIE</tracking-mode>
     </session-config>
+
+    <!-- 会话池配置 -->
+    <context-param>
+        <param-name>session.pool.maxTotal</param-name>
+        <param-value>100</param-value>
+    </context-param>
+    
+    <context-param>
+        <param-name>session.pool.maxIdle</param-name>
+        <param-value>20</param-value>
+    </context-param>
+    
+    <context-param>
+        <param-name>session.pool.minIdle</param-name>
+        <param-value>5</param-value>
+    </context-param>
+    
+    <context-param>
+        <param-name>session.pool.maxWaitMillis</param-name>
+        <param-value>5000</param-value>
+    </context-param>
+    
+    <!-- 会话超时时间（毫秒），与Web容器会话超时保持一致 -->
+    <context-param>
+        <param-name>session.pool.sessionTimeout</param-name>
+        <param-value>1800000</param-value>
+    </context-param>
 
 </web-app>
