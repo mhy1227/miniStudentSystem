@@ -17,6 +17,11 @@
     <context:component-scan base-package="com.czj.student.aspect"/>
     <context:component-scan base-package="com.czj.student.common"/>
     <context:component-scan base-package="com.czj.student.session"/>
+    <!-- 添加分页功能相关包的扫描 -->
+    <context:component-scan base-package="com.czj.student.annotation"/>
+    <context:component-scan base-package="com.czj.student.util"/>
+    <context:component-scan base-package="com.czj.student.model"/>
+    <context:component-scan base-package="com.czj.student.snopool"/>
     <!-- 启用注解 -->
     <mvc:annotation-driven>
         <mvc:message-converters>
