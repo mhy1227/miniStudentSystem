@@ -1,17 +1,24 @@
 package com.czj.student.service.impl;
 
+import com.czj.student.annotation.CacheInvalidate;
+import com.czj.student.annotation.PageQuery;
+import com.czj.student.model.dto.StudentDTO;
 import com.czj.student.model.entity.Student;
+import com.czj.student.model.vo.PageInfo;
+import com.czj.student.model.vo.StudentVO;
 import com.czj.student.mapper.StudentMapper;
 import com.czj.student.service.StudentService;
 import com.czj.student.util.PageRequest;
 import com.czj.student.util.PageResult;
 import com.czj.student.util.ValidateUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -35,6 +42,28 @@ public class StudentServiceImpl implements StudentService {
         
         // 返回分页结果
         return new PageResult<>(pageRequest.getPageNum(), pageRequest.getPageSize(), total, list);
+    }
+    
+    @Override
+    @PageQuery(cacheGroups = {"student"})
+    public PageInfo<StudentVO> queryStudentsByPage(PageInfo<StudentVO> pageInfo, String keyword) {
+        // 查询总数
+        int total = studentMapper.countStudentsByKeyword(keyword);
+        
+        // 如果没有记录，直接返回空结果
+        if (total == 0) {
+            return pageInfo.of(Collections.emptyList(), 0);
+        }
+        
+        // 计算分页参数
+        int offset = pageInfo.getOffset();
+        int size = pageInfo.getSize();
+        
+        // 查询数据
+        List<StudentVO> students = studentMapper.queryStudentsByPage(offset, size, keyword);
+        
+        // 设置分页结果
+        return pageInfo.of(students, total);
     }
 
     @Override
@@ -95,6 +124,34 @@ public class StudentServiceImpl implements StudentService {
             throw new RuntimeException("添加学生失败");
         }
     }
+    
+    @Override
+    @Transactional
+    @CacheInvalidate(cacheGroups = {"student"})
+    public boolean addStudentDTO(StudentDTO studentDTO) {
+        // 参数校验
+        if (studentDTO == null) {
+            throw new IllegalArgumentException("学生信息不能为空");
+        }
+        
+        // 检查学号是否已存在
+        Student existingStudent = studentMapper.selectByStudentNo(studentDTO.getSno());
+        if (existingStudent != null) {
+            throw new RuntimeException("学号已存在");
+        }
+        
+        // 转换为实体对象
+        Student student = new Student();
+        BeanUtils.copyProperties(studentDTO, student);
+        
+        // 设置创建时间
+        student.setCreatedTime(new Date());
+        student.setUpdatedTime(new Date());
+        
+        // 插入学生信息
+        int rows = studentMapper.insert(student);
+        return rows == 1;
+    }
 
     @Override
     @Transactional
@@ -135,9 +192,45 @@ public class StudentServiceImpl implements StudentService {
             throw new RuntimeException("更新学生信息失败");
         }
     }
+    
+    @Override
+    @Transactional
+    @CacheInvalidate(cacheGroups = {"student"})
+    public boolean updateStudentDTO(StudentDTO studentDTO) {
+        // 参数校验
+        if (studentDTO == null || studentDTO.getSid() == null) {
+            throw new IllegalArgumentException("学生ID不能为空");
+        }
+        
+        // 检查学生是否存在
+        Student existingStudent = studentMapper.selectById(studentDTO.getSid());
+        if (existingStudent == null) {
+            throw new RuntimeException("学生不存在");
+        }
+        
+        // 如果修改了学号，检查新学号是否已存在
+        if (!existingStudent.getSno().equals(studentDTO.getSno())) {
+            Student studentWithSameNo = studentMapper.selectByStudentNo(studentDTO.getSno());
+            if (studentWithSameNo != null && !studentWithSameNo.getSid().equals(studentDTO.getSid())) {
+                throw new RuntimeException("学号已存在");
+            }
+        }
+        
+        // 转换为实体对象
+        Student student = new Student();
+        BeanUtils.copyProperties(studentDTO, student);
+        
+        // 设置更新时间
+        student.setUpdatedTime(new Date());
+        
+        // 更新学生信息
+        int rows = studentMapper.update(student);
+        return rows == 1;
+    }
 
     @Override
     @Transactional
+    @CacheInvalidate(cacheGroups = {"student"})
     public void deleteStudent(Long sid) {
         // 参数校验
         if (sid == null) {
@@ -197,19 +290,6 @@ public class StudentServiceImpl implements StudentService {
         }
         if (!ValidateUtils.isValidGender(student.getGender())) {
             throw new IllegalArgumentException("性别只能是M(男)或F(女)");
-        }
-        
-        // 校验专业
-        if (!StringUtils.hasText(student.getMajor())) {
-            throw new IllegalArgumentException("专业不能为空");
-        }
-        if (!ValidateUtils.isLengthValid(student.getMajor(), 2, 30)) {
-            throw new IllegalArgumentException("专业名称长度应在2-30个字符之间");
-        }
-        
-        // 校验备注
-        if (student.getRemark() != null && !ValidateUtils.isLengthValid(student.getRemark(), 0, 500)) {
-            throw new IllegalArgumentException("备注长度不能超过500个字符");
         }
     }
 }

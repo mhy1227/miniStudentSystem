@@ -2,7 +2,10 @@ package com.czj.student.controller;
 
 import com.czj.student.annotation.Log;
 import com.czj.student.common.ApiResponse;
+import com.czj.student.model.dto.StudentDTO;
 import com.czj.student.model.entity.Student;
+import com.czj.student.model.vo.PageInfo;
+import com.czj.student.model.vo.StudentVO;
 import com.czj.student.service.StudentService;
 import com.czj.student.util.PageRequest;
 import com.czj.student.util.PageResult;
@@ -32,6 +35,23 @@ public class StudentController {
         PageResult<Student> result = studentService.listStudents(student, pageRequest);
         log.info("查询学生列表成功，总记录数：{}", result.getTotal());
         return ApiResponse.success(result);
+    }
+    
+    /**
+     * 使用新分页框架查询学生列表
+     */
+    @Log(module = "学生管理", type = "查询", description = "使用新分页框架查询学生列表")
+    @GetMapping("/page")
+    public ApiResponse<PageInfo<StudentVO>> getStudentsByPage(
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer size,
+            @RequestParam(required = false) String keyword) {
+        
+        log.info("开始分页查询学生列表，参数：page={}, size={}, keyword={}", page, size, keyword);
+        PageInfo<StudentVO> pageInfo = new PageInfo<>(page, size);
+        pageInfo = studentService.queryStudentsByPage(pageInfo, keyword);
+        log.info("分页查询学生列表成功，总记录数：{}", pageInfo.getTotal());
+        return ApiResponse.success(pageInfo);
     }
     
     /**
@@ -66,6 +86,21 @@ public class StudentController {
     }
     
     /**
+     * 新增学生(使用DTO)
+     */
+    @Log(module = "学生管理", type = "新增", description = "新增学生信息(使用DTO)")
+    @PostMapping("/dto")
+    public ApiResponse<Void> addWithDTO(@RequestBody @Valid StudentDTO studentDTO) {
+        boolean success = studentService.addStudentDTO(studentDTO);
+        if (success) {
+            log.info("新增学生成功，sno={}", studentDTO.getSno());
+            return ApiResponse.success();
+        } else {
+            return ApiResponse.error("新增学生失败");
+        }
+    }
+    
+    /**
      * 更新学生信息
      */
     @Log(module = "学生管理", type = "修改", description = "更新学生信息")
@@ -75,6 +110,22 @@ public class StudentController {
         studentService.updateStudent(student);
         log.info("更新学生成功，sid={}", sid);
         return ApiResponse.success();
+    }
+    
+    /**
+     * 更新学生信息(使用DTO)
+     */
+    @Log(module = "学生管理", type = "修改", description = "更新学生信息(使用DTO)")
+    @PutMapping("/dto/{sid}")
+    public ApiResponse<Void> updateWithDTO(@PathVariable Long sid, @RequestBody @Valid StudentDTO studentDTO) {
+        studentDTO.setSid(sid);
+        boolean success = studentService.updateStudentDTO(studentDTO);
+        if (success) {
+            log.info("更新学生成功，sid={}", sid);
+            return ApiResponse.success();
+        } else {
+            return ApiResponse.error("更新学生失败");
+        }
     }
     
     /**

@@ -14,6 +14,20 @@
         <result column="created_time" property="createdTime"/>
         <result column="updated_time" property="updatedTime"/>
     </resultMap>
+    
+    <!-- StudentVO结果映射 -->
+    <resultMap id="StudentVOMap" type="com.czj.student.model.vo.StudentVO">
+        <id column="sid" property="sid"/>
+        <result column="sno" property="sno"/>
+        <result column="name" property="name"/>
+        <result column="sfzh" property="sfzh"/>
+        <result column="gender" property="gender"/>
+        <result column="major" property="major"/>
+        <result column="remark" property="remark"/>
+        <result column="created_time" property="createdTime"/>
+        <result column="updated_time" property="updatedTime"/>
+        <result column="last_login_time" property="lastLoginTime"/>
+    </resultMap>
 
     <!-- 通用查询列 -->
     <sql id="Base_Column_List">
@@ -107,5 +121,35 @@
                 AND major LIKE CONCAT('%', #{major}, '%')
             </if>
         </where>
+    </select>
+    
+    <!-- 根据关键字统计学生数量 -->
+    <select id="countStudentsByKeyword" resultType="int">
+        SELECT COUNT(*)
+        FROM student
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (sno LIKE CONCAT('%', #{keyword}, '%') 
+                OR name LIKE CONCAT('%', #{keyword}, '%')
+                OR major LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+        </where>
+    </select>
+    
+    <!-- 分页查询学生列表 -->
+    <select id="queryStudentsByPage" resultMap="StudentVOMap">
+        SELECT 
+            sid, sno, name, sfzh, gender, major, remark, 
+            created_time, updated_time, last_login_time
+        FROM student
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (sno LIKE CONCAT('%', #{keyword}, '%') 
+                OR name LIKE CONCAT('%', #{keyword}, '%')
+                OR major LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+        </where>
+        ORDER BY created_time DESC
+        LIMIT #{offset}, #{size}
     </select>
 </mapper>

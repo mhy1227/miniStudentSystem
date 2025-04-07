@@ -2,6 +2,9 @@ package com.czj.student.service;
 
 import org.springframework.stereotype.Service;
 import com.czj.student.model.entity.Student;
+import com.czj.student.model.dto.StudentDTO;
+import com.czj.student.model.vo.StudentVO;
+import com.czj.student.model.vo.PageInfo;
 import com.czj.student.util.PageRequest;
 import com.czj.student.util.PageResult;
 
@@ -15,6 +18,15 @@ public interface StudentService {
      * @return 分页结果
      */
     PageResult<Student> listStudents(Student student, PageRequest pageRequest);
+    
+    /**
+     * 使用新分页框架查询学生列表
+     *
+     * @param pageInfo 分页参数
+     * @param keyword 关键字查询
+     * @return 分页结果
+     */
+    PageInfo<StudentVO> queryStudentsByPage(PageInfo<StudentVO> pageInfo, String keyword);
 
     /**
      * 根据ID查询学生
@@ -38,6 +50,14 @@ public interface StudentService {
      * @param student 学生信息
      */
     void addStudent(Student student);
+    
+    /**
+     * 新增学生(使用DTO)
+     *
+     * @param studentDTO 学生数据传输对象
+     * @return 是否添加成功
+     */
+    boolean addStudentDTO(StudentDTO studentDTO);
 
     /**
      * 更新学生信息
@@ -45,6 +65,14 @@ public interface StudentService {
      * @param student 学生信息
      */
     void updateStudent(Student student);
+    
+    /**
+     * 更新学生信息(使用DTO)
+     *
+     * @param studentDTO 学生数据传输对象
+     * @return 是否更新成功
+     */
+    boolean updateStudentDTO(StudentDTO studentDTO);
 
     /**
      * 删除学生

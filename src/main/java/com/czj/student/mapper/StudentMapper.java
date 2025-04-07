@@ -1,6 +1,7 @@
 package com.czj.student.mapper;
 
 import com.czj.student.model.entity.Student;
+import com.czj.student.model.vo.StudentVO;
 import org.apache.ibatis.annotations.Param;
 import java.util.List;
 
@@ -63,4 +64,23 @@ public interface StudentMapper {
      * @return 总记录数
      */
     long selectCount(Student student);
+    
+    /**
+     * 根据关键字统计学生总数
+     * @param keyword 关键字
+     * @return 学生总数
+     */
+    int countStudentsByKeyword(@Param("keyword") String keyword);
+
+    /**
+     * 分页查询学生列表
+     * @param offset 起始位置
+     * @param size 每页大小
+     * @param keyword 关键字
+     * @return 学生视图对象列表
+     */
+    List<StudentVO> queryStudentsByPage(
+        @Param("offset") int offset, 
+        @Param("size") int size, 
+        @Param("keyword") String keyword);
 } 
