@@ -37,7 +37,7 @@ function loadStudents() {
             // 渲染学生列表
             const tbody = document.getElementById('studentList');
             tbody.innerHTML = '';
-            data.list.forEach(student => {
+            data.rows.forEach(student => {
                 tbody.innerHTML += `
                     <tr>
                         <td>${student.sno}</td>
