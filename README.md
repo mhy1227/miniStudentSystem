@@ -139,4 +139,43 @@ miniStudentSystem/
 ## 开发指南
 
 ### 分支管理
-- `
+- `main`: 主分支，保存稳定版本代码
+- `feature/*`: 功能开发分支，如 `feature/file-upload`
+- `bugfix/*`: 问题修复分支
+- `docs/*`: 文档更新分支
+
+### 代码风格
+- 遵循Java代码规范
+- 使用4空格缩进
+- 类和方法必须有JavaDoc注释
+- 变量命名采用驼峰命名法
+- 常量使用全大写字母，单词间用下划线分隔
+
+### 提交规范
+- 使用约定式提交规范（Conventional Commits）
+- 格式: `<类型>: <描述>`
+- 常用类型: 
+  - `feat`: 新功能
+  - `fix`: 错误修复
+  - `docs`: 文档更改
+  - `style`: 代码格式调整
+  - `refactor`: 代码重构
+  - `test`: 测试相关
+  - `chore`: 构建过程或辅助工具的变动
+
+### 单元测试
+- 新增功能需编写对应单元测试
+- 测试覆盖率保持在70%以上
+- 测试代码放在对应的测试目录下
+
+## 贡献指南
+欢迎贡献代码和提出建议，请通过以下步骤参与：
+
+1. Fork 本仓库
+2. 创建功能分支 (`git checkout -b feature/amazing-feature`)
+3. 提交更改 (`git commit -m 'feat: 添加某功能'`)
+4. 推送到分支 (`git push origin feature/amazing-feature`)
+5. 提交 Pull Request
+
+## 版本历史
+- v1.0.0 (2025-04): 首个稳定版本，包含登录、学号池、分页查询和文件上传设计
