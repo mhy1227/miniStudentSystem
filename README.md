@@ -1,7 +1,7 @@
 # 学生信息管理系统
 
 ## 项目简介
-一个基于SpringMVC的学生管理系统，目前已实现登录功能、会话管理和学号池等核心组件，主要用于学习和演示目的。
+一个基于SpringMVC的学生管理系统，目前已实现登录功能、会话管理、学号池和分页查询等核心组件，主要用于学习和演示目的。
 
 ## 项目目标
 - 实现基础的学生信息管理功能
@@ -19,6 +19,12 @@
   - 基础的学号生成与分配
   - 学号回收与重用机制
   - 线程安全的并发处理
+
+- **高性能分页查询**
+  - 基于AOP的分页查询缓存
+  - 注解驱动的缓存管理
+  - 关键字搜索功能
+  - 缓存自动失效机制
 
 ## 待实现功能
 - 学生信息的增删改查
@@ -38,17 +44,25 @@
   - 学号的分配与回收
   - 并发安全设计
 
+- **查询缓存池（Query Pool）**
+  - 基于内存的查询结果缓存
+  - AOP切面实现自动缓存
+  - 缓存分组与自动失效
+  - 支持性能监控统计
+
 ## 技术栈
 - **后端**
   - Spring MVC 5.3.x
   - MyBatis 3.5.x
   - MySQL 8.0
   - Druid 连接池
+  - AOP切面编程
   
 - **前端**
   - HTML + CSS
   - JavaScript + jQuery
   - Bootstrap 基础组件
+  - 响应式分页控件
   
 - **开发工具**
   - Maven 构建
@@ -61,18 +75,27 @@ miniStudentSystem/
 │   ├── main/
 │   │   ├── java/
 │   │   │   └── com/czj/student/
+│   │   │       ├── annotation/   # 自定义注解
+│   │   │       ├── aspect/       # AOP切面
 │   │   │       ├── common/       # 通用工具
 │   │   │       ├── controller/   # 控制器
 │   │   │       ├── dao/          # 数据访问
 │   │   │       ├── interceptor/  # 拦截器
 │   │   │       ├── model/        # 数据模型
+│   │   │       │   ├── dto/      # 数据传输对象
+│   │   │       │   ├── entity/   # 实体对象
+│   │   │       │   └── vo/       # 视图对象
 │   │   │       ├── service/      # 服务层
 │   │   │       ├── session/      # 会话管理
-│   │   │       └── snopool/      # 学号池
+│   │   │       ├── snopool/      # 学号池
+│   │   │       └── util/         # 工具类
+│   │   │           └── pool/     # 缓存池
 │   │   ├── resources/            # 配置文件
 │   │   └── webapp/               # Web资源
 │   └── test/                     # 测试代码
 └── docs/                         # 文档
+    ├── features/                 # 功能文档
+    │   └── pagination/           # 分页功能文档
     ├── git/                      # Git指南
     ├── login/                    # 登录文档
     ├── pool/                     # 池设计文档
@@ -121,11 +144,13 @@ miniStudentSystem/
 ### 主要模块文档
 - 会话管理: `docs/login/session_detection.md`
 - 学号池: `docs/pool/student_number_pool_design.md`
+- 分页查询: `docs/features/pagination/pagination_implementation.md`
+- 分页最佳实践: `docs/features/pagination/pagination_best_practices.md`
 - SpringBoot迁移参考: `docs/mvc_to_boot/migration_guide.md`
 
 ## 开发计划
 - 完善学生基本信息管理
-- 实现Redis版学号池
+- 实现Redis版学号池与缓存池
 - 改进前端页面交互
 - 实现学生选课功能
 
