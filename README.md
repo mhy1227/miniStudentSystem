@@ -9,7 +9,7 @@
 - 实践会话管理和资源池化设计
 - 理解MVC设计模式和RESTful API设计
 
-## 已实现功能
+## 已完成功能
 - **用户登录与会话管理**
   - 基本的登录认证
   - 会话状态维护
@@ -25,6 +25,11 @@
   - 注解驱动的缓存管理
   - 关键字搜索功能
   - 缓存自动失效机制
+  
+- **文件上传功能设计**
+  - 安全的文件上传机制设计
+  - 文件命名策略
+  - 安全验证方案
 
 ## 待实现功能
 - 学生信息的增删改查
@@ -32,6 +37,23 @@
 - 选课管理功能
 - 成绩管理功能
 - 权限管理系统
+
+## 技术架构
+- 后端：Spring MVC、MyBatis
+- 前端：HTML、CSS、JavaScript、Bootstrap
+- 数据库：MySQL
+- 缓存：自定义内存缓存、AOP实现
+- 会话管理：基于池化的会话管理系统
+
+## 文档目录
+- **核心功能文档**
+  - [异地登录功能测试指南](docs/login/session_test_guide.md)
+  - [学号池设计文档](docs/pool/student_number_pool_design.md)
+  - [分页功能实现文档](docs/features/pagination/pagination_implementation.md)
+  - [文件上传设计文档](docs/features/file-upload/file_upload_design.md)
+  
+- **规划文档**
+  - [系统未来扩展规划](docs/roadmap/future_expansion_plan.md)
 
 ## 技术组件
 - **会话池（Session Pool）**
@@ -108,53 +130,13 @@ miniStudentSystem/
 - MySQL 5.7+
 - Tomcat 8.5+
 
-## 如何运行
-1. 克隆项目
-   ```
-   git clone https://github.com/mhy1227/miniStudentSystem.git
-   ```
-
-2. 配置数据库
-   - 创建名为`student_system`的数据库
-   - 导入`sql/init.sql`脚本(如有)
-   - 修改`src/main/resources/jdbc.properties`中的数据库配置
-
-3. 编译打包
-   ```
-   mvn clean package
-   ```
-
-4. 部署运行
-   - 将war包部署到Tomcat下
-   - 或使用Maven插件启动：`mvn tomcat7:run`
-
-5. 访问系统
-   - 浏览器访问：`http://localhost:8080/`
-   - 默认用户名密码：见开发文档
+## 运行指南
+1. 克隆项目到本地
+2. 配置数据库连接（application.properties）
+3. 部署到Tomcat或其他Servlet容器
+4. 访问 http://localhost:8080/login.html
 
 ## 开发指南
 
 ### 分支管理
-- `main`: 主分支
-- `feature/*`: 功能分支
-- `hotfix/*`: 修复分支
-
-详见 `docs/git/branch_guide.md`
-
-### 主要模块文档
-- 会话管理: `docs/login/session_detection.md`
-- 学号池: `docs/pool/student_number_pool_design.md`
-- 分页查询: `docs/features/pagination/pagination_implementation.md`
-- 分页最佳实践: `docs/features/pagination/pagination_best_practices.md`
-- SpringBoot迁移参考: `docs/mvc_to_boot/migration_guide.md`
-
-## 开发计划
-- 完善学生基本信息管理
-- 实现Redis版学号池与缓存池
-- 改进前端页面交互
-- 实现学生选课功能
-
-## 注意事项
-- 这是一个学习项目，功能持续开发中
-- 代码提交前请先本地测试
-- 遵循项目Git提交规范 
+- `
