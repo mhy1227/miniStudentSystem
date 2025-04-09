@@ -1,9 +1,108 @@
 # 简单学号池实现分析
 
+
 ## 1. 概述
 
 本文档分析了一种简单的学号池实现方案，该方案使用内存链表结构管理学号资源，并采用基于时间的超时回收机制。虽然实现简单，但包含了资源池化管理的核心思想，特别是其超时回收机制值得参考。
 
+```java
+//XHpools.java
+package com.hugeyurt.util;
+
+class Node
+{
+	String xh;
+	String sessionID;
+	Long   usingTime;
+	Node next;
+	
+	public Node(String xh,String sessionID,Long current)
+	{
+		this.xh=xh;
+		this.sessionID=sessionID;
+		this.usingTime=current;
+	}
+}
+
+public class XHPools
+{
+	private static Integer max=0;
+	private  static Node xhPools=null;
+	
+	public static Boolean check()
+	{
+	   if(max==null||max==0) return false;
+	   return true;
+	}
+	
+	public static void setMax(int max)
+	{
+		XHPools.max=max;
+	}
+	
+	public  static String getXH(String sessionID)
+	{
+	    Node p=xhPools;
+	    while(p!=null&&(!sessionID.equals(p.sessionID)))
+	    	p=p.next;
+	    if(p!=null) return p.xh;
+		
+	    Long current=System.currentTimeMillis();
+	    p=xhPools;
+	    while(p!=null&&(current-p.usingTime)<10*60*1000)
+	    	p=p.next;
+	    if(p!=null) 
+	    {
+	    	p.sessionID=sessionID;
+	    	p.usingTime=current;
+	    	return p.xh ;
+	    }
+	    
+	    
+	    max++;
+		String xh=toXH(max);
+		Node node=new Node(xh,sessionID,current);
+		node.next=xhPools;
+		xhPools=node;
+		return xh;
+	}
+	
+	private static  String toXH(int num)
+	{
+	   if(num<10) return "XH000"+num;
+	   if(num<100) return "XH00"+num;
+	   if(num<1000) return "XH0"+num;
+	   return "XH"+num;
+	}
+
+}
+```
+
+```java
+@Override
+public String getXH(String id) {
+    // TODO Auto-generated method stub
+       Integer token=3;
+      synchronized (token) {
+          if(!XHPools.check())
+          {
+             String xh=userMapper.getMaxXh();
+             int num=Integer.parseInt(xh.substring(2));
+             XHPools.setMax(num);
+          }
+    }
+      
+    return XHPools.getXH(id);
+}
+
+private String toXH(int num)
+{
+   if(num<10) return "XH000"+num;
+   if(num<100) return "XH00"+num;
+   if(num<1000) return "XH0"+num;
+   return "XH"+num;
+}
+```
 ### 1.1 功能定位
 
 该学号池实现的主要功能是：
