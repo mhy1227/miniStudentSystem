@@ -94,6 +94,16 @@ public class LoginServiceImpl implements LoginService {
 
     @Override
     public boolean isAccountLocked(String sno, HttpSession session) {
+        // 如果session为null，只检查数据库中的错误次数
+        if (session == null) {
+            Student student = loginMapper.getStudentBySno(sno);
+            if (student != null && student.getLoginErrorCount() != null && 
+                student.getLoginErrorCount() >= LoginConstants.MAX_ERROR_COUNT) {
+                return true;
+            }
+            return false;
+        }
+
         // 先检查session中的锁定状态
         LocalDateTime lockTime = (LocalDateTime) session.getAttribute(LoginConstants.SESSION_LOCK_TIME_KEY);
         if (lockTime != null) {

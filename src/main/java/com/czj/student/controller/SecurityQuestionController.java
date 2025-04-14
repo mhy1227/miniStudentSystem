@@ -33,7 +33,9 @@ public class SecurityQuestionController {
     @PostMapping("/question")
     public ApiResponse<Boolean> setSecurityQuestion(@RequestBody Map<String, Object> params) {
         String sno = (String) params.get("sno");
-        Integer questionId = (Integer) params.get("questionId");
+        Integer questionId = params.get("questionId") instanceof String ? 
+            Integer.valueOf((String) params.get("questionId")) : 
+            (Integer) params.get("questionId");
         String answer = (String) params.get("answer");
         
         if (sno == null || questionId == null || answer == null) {

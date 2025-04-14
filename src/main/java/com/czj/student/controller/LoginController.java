@@ -77,7 +77,11 @@ public class LoginController {
             Map<String, Object> data = new HashMap<>();
             data.put("needVerify", true);
             data.put("questions", questions);
-            return ApiResponse.custom(202, "需要安全验证", data);
+            ApiResponse<Object> response = new ApiResponse<>();
+            response.setCode(202);
+            response.setMessage("需要安全验证");
+            response.setData(data);
+            return response;
         }
         
         // 4. 执行正常登录流程

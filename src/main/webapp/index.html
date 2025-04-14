@@ -52,6 +52,7 @@
             <a href="course.html" class="menu-item">课程管理</a>
             <a href="student-course.html" class="menu-item">选课管理</a>
             <a href="grade.html" class="menu-item">成绩管理</a>
+            <a href="security_question_setting.html" class="menu-item">安全设置</a>
         </nav>
     </div>
 
@@ -83,6 +84,11 @@
                         const user = response.data;
                         $('#userName').text(user.name);
                         $('#welcome').text('欢迎, ' + user.name);
+                    } else if (response.code === 202 && response.data.needVerify) {
+                        // 处理异地登录验证
+                        const question = response.data.questions[0];
+                        const verifyUrl = `remote_login_verify.html?sno=${response.data.sno}&questionId=${question.questionId}&question=${encodeURIComponent(question.question)}`;
+                        window.location.href = verifyUrl;
                     } else {
                         console.error('获取用户信息失败:', response.message);
                         window.location.replace('login.html');
@@ -90,12 +96,11 @@
                 },
                 error: function(xhr, status, error) {
                     console.error('获取用户信息请求失败:', status, error);
-                    console.error('响应详情:', xhr.responseJSON);
                     if (xhr.status === 401) {
                         console.log('用户未登录或会话已过期');
                         window.location.replace('login.html');
                     } else {
-                        alert('系统错误，请稍后重试');
+                        showError('系统错误，请稍后重试');
                     }
                 }
             });

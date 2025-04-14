@@ -11,6 +11,9 @@ import org.springframework.stereotype.Component;
 import com.czj.student.annotation.Log;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpServletRequest;
+import java.util.Map;
 
 @Aspect
 @Component
@@ -50,7 +53,8 @@ public class LogAspect {
         
         // 4. 打印请求信息
         logger.info("开始调用: {}.{}", className, methodName);
-        logger.info("方法参数: {}", Arrays.toString(args));
+        logger.info("方法参数: {}", formatArgs(args));
+        // logger.info("方法参数: {}", Arrays.toString(args));
         
         // 5. 执行原方法
         Object result = null;
@@ -69,5 +73,42 @@ public class LogAspect {
         }
         
         return result;
+    }
+
+    private String formatArgs(Object[] args) {
+        if (args == null || args.length == 0) {
+            return "[]";
+        }
+        
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < args.length; i++) {
+            if (i > 0) {
+                sb.append(", ");
+            }
+            
+            Object arg = args[i];
+            if (arg instanceof HttpSession) {
+                HttpSession session = (HttpSession) arg;
+                sb.append("Session(id=").append(session.getId()).append(")");
+            } 
+            else if (arg instanceof HttpServletRequest) {
+                HttpServletRequest request = (HttpServletRequest) arg;
+                sb.append("Request(uri=").append(request.getRequestURI()).append(")");
+            }
+            else if (arg instanceof Map) {
+                // Map类型参数直接输出，因为它们通常包含业务数据
+                sb.append(arg);
+            }
+            else if (arg != null && arg.getClass().getName().startsWith("org.apache.catalina")) {
+                // 对于其他Tomcat内部类，只显示简单类名
+                sb.append(arg.getClass().getSimpleName());
+            }
+            else {
+                // 其他参数（如VO对象等）直接输出
+                sb.append(arg);
+            }
+        }
+        sb.append("]");
+        return sb.toString();
     }
 }

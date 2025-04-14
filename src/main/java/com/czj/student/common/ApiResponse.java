@@ -45,12 +45,4 @@ public class ApiResponse<T> {
     public static <T> ApiResponse<T> notFound(String message) {
         return error(404, message);
     }
-
-    public static <T> ApiResponse<T> custom(int code, String message, T data) {
-        ApiResponse<T> response = new ApiResponse<>();
-        response.setCode(code);
-        response.setMessage(message);
-        response.setData(data);
-        return response;
-    }
 }

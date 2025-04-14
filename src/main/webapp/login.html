@@ -75,6 +75,9 @@
                     </div>
                 </div>
                 <button type="submit" class="btn btn-primary btn-block">登录</button>
+                <div class="text-center mt-3">
+                    <a href="reset_password.html" class="text-decoration-none">忘记密码？</a>
+                </div>
             </form>
         </div>
     </div>
@@ -184,8 +187,22 @@
                             setTimeout(function() {
                                 window.location.replace('index.html');
                             }, 100);
+                        } else if (response.code === 202 && response.data.needVerify) {
+                            // 处理异地登录验证
+                            const question = response.data.questions[0];
+                            const verifyUrl = `remote_login_verify.html?sno=${loginData.sno}&questionId=${question.questionId}&question=${encodeURIComponent(question.question)}&token=${response.data.verifyToken}`;
+                            // 打开验证窗口
+                            const verifyWindow = window.open(verifyUrl, 'verifyWindow', 'width=500,height=400');
+                            
+                            // 监听验证结果
+                            window.addEventListener('message', function(event) {
+                                if (event.data.type === 'verifySuccess') {
+                                    verifyWindow.close();
+                                    window.location.replace('index.html');
+                                }
+                            });
                         } else {
-                            console.error('登录失败:', response.message);  // 添加错误日志
+                            console.error('登录失败:', response.message);
                             showError(response.message || '登录失败，请稍后重试');
                             generateCaptcha();
                             $('#captcha').val('');
