@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>安全验证</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .verify-container {
+            max-width: 500px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .error-message {
+            color: red;
+            display: none;
+            margin-top: 10px;
+        }
+        .warning-text {
+            color: #856404;
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="verify-container">
+        <h3 class="text-center mb-4">异地登录验证</h3>
+        <div class="warning-text">
+            检测到您正在使用新的设备登录，请回答安全问题进行身份验证。
+        </div>
+        <form id="verifyForm">
+            <div class="mb-3">
+                <label class="form-label">安全问题：</label>
+                <div id="questionText" class="form-control-plaintext"></div>
+            </div>
+            <div class="mb-3">
+                <label for="answer" class="form-label">您的答案：</label>
+                <input type="text" class="form-control" id="answer" required>
+            </div>
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary">验证</button>
+                <button type="button" class="btn btn-secondary" onclick="window.close()">取消</button>
+            </div>
+        </form>
+        <div id="errorMessage" class="error-message"></div>
+    </div>
+
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        // 从URL获取参数
+        const urlParams = new URLSearchParams(window.location.search);
+        const sno = urlParams.get('sno');
+        const verifyToken = urlParams.get('token');
+        const questionId = urlParams.get('questionId');
+        const question = urlParams.get('question');
+
+        $(document).ready(function() {
+            // 显示安全问题
+            $('#questionText').text(question);
+
+            // 提交验证
+            $('#verifyForm').on('submit', function(e) {
+                e.preventDefault();
+                
+                const data = {
+                    sno: sno,
+                    questionId: questionId,
+                    answer: $('#answer').val(),
+                    verifyToken: verifyToken
+                };
+
+                $.ajax({
+                    url: '/api/auth/verify-login',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(data),
+                    success: function(response) {
+                        if (response.code === 200) {
+                            // 验证成功，通知父窗口
+                            if (window.opener) {
+                                window.opener.postMessage({
+                                    type: 'verifySuccess',
+                                    data: response.data
+                                }, '*');
+                                window.close();
+                            }
+                        } else {
+                            $('#errorMessage').text(response.message).show();
+                        }
+                    },
+                    error: function() {
+                        $('#errorMessage').text('验证失败，请稍后重试').show();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html> 
