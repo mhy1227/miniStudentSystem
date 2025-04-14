@@ -4,6 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * API响应封装类
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -13,7 +16,11 @@ public class ApiResponse<T> {
     private T data;
 
     public static <T> ApiResponse<T> success(T data) {
-        return new ApiResponse<>(200, "操作成功", data);
+        ApiResponse<T> response = new ApiResponse<>();
+        response.setCode(200);
+        response.setMessage("success");
+        response.setData(data);
+        return response;
     }
 
     public static <T> ApiResponse<T> success() {
@@ -21,7 +28,10 @@ public class ApiResponse<T> {
     }
 
     public static <T> ApiResponse<T> error(Integer code, String message) {
-        return new ApiResponse<>(code, message, null);
+        ApiResponse<T> response = new ApiResponse<>();
+        response.setCode(code);
+        response.setMessage(message);
+        return response;
     }
 
     public static <T> ApiResponse<T> error(String message) {
@@ -34,5 +44,13 @@ public class ApiResponse<T> {
 
     public static <T> ApiResponse<T> notFound(String message) {
         return error(404, message);
+    }
+
+    public static <T> ApiResponse<T> custom(int code, String message, T data) {
+        ApiResponse<T> response = new ApiResponse<>();
+        response.setCode(code);
+        response.setMessage(message);
+        response.setData(data);
+        return response;
     }
 }

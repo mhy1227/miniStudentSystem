@@ -122,4 +122,72 @@ public class LoginServiceImpl implements LoginService {
 
         return false;
     }
+
+    @Override
+    public void validateCredentials(LoginVO loginVO) {
+        // 1. 检查账号是否锁定
+        if (isAccountLocked(loginVO.getSno(), null)) {
+            throw new RuntimeException("账号已锁定，请稍后再试");
+        }
+
+        // 2. 查询学生信息
+        Student student = loginMapper.getStudentBySno(loginVO.getSno());
+        if (student == null) {
+            throw new RuntimeException("学号不存在");
+        }
+
+        // 3. 验证密码
+        if (!student.getPwd().equals(loginVO.getPwd())) {
+            // 更新数据库中的错误次数
+            int errorCount = (student.getLoginErrorCount() == null ? 0 : student.getLoginErrorCount()) + 1;
+            loginMapper.updateLoginErrorCount(loginVO.getSno(), errorCount);
+            
+            if (errorCount >= LoginConstants.MAX_ERROR_COUNT) {
+                throw new RuntimeException("密码错误次数过多，账号已锁定");
+            }
+            
+            throw new RuntimeException("密码错误，还剩" + (LoginConstants.MAX_ERROR_COUNT - errorCount) + "次机会");
+        }
+
+        // 4. 验证通过，重置错误次数
+        loginMapper.updateLoginErrorCount(loginVO.getSno(), 0);
+    }
+
+    @Override
+    public void resetPassword(String sno, String newPassword) {
+        // 1. 检查学生是否存在
+        Student student = loginMapper.getStudentBySno(sno);
+        if (student == null) {
+            throw new RuntimeException("学号不存在");
+        }
+        
+        // 2. 更新密码
+        if (loginMapper.updatePassword(sno, newPassword) <= 0) {
+            throw new RuntimeException("重置密码失败");
+        }
+        
+        // 3. 重置错误次数和锁定状态
+        loginMapper.updateLoginErrorCount(sno, 0);
+    }
+
+    @Override
+    public void adminResetPassword(String sno, String newPassword, String adminId) {
+        // 1. 检查学生是否存在
+        Student student = loginMapper.getStudentBySno(sno);
+        if (student == null) {
+            throw new RuntimeException("学号不存在");
+        }
+        
+        // TODO: 这里应该添加管理员权限验证
+        
+        // 2. 更新密码
+        if (loginMapper.updatePassword(sno, newPassword) <= 0) {
+            throw new RuntimeException("重置密码失败");
+        }
+        
+        // 3. 重置错误次数和锁定状态
+        loginMapper.updateLoginErrorCount(sno, 0);
+        
+        // TODO: 这里可以添加管理员操作日志
+    }
 } 

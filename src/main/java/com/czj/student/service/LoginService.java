@@ -10,6 +10,14 @@ import javax.servlet.http.HttpSession;
  */
 public interface LoginService {
     /**
+     * 验证登录凭证
+     *
+     * @param loginVO 登录参数
+     * @throws RuntimeException 验证失败时抛出异常
+     */
+    void validateCredentials(LoginVO loginVO);
+
+    /**
      * 登录
      *
      * @param loginVO 登录参数
@@ -41,4 +49,21 @@ public interface LoginService {
      * @return true-已锁定，false-未锁定
      */
     boolean isAccountLocked(String sno, HttpSession session);
+
+    /**
+     * 重置密码
+     *
+     * @param sno 学号
+     * @param newPassword 新密码
+     */
+    void resetPassword(String sno, String newPassword);
+
+    /**
+     * 管理员重置用户密码
+     *
+     * @param sno 学号
+     * @param newPassword 新密码
+     * @param adminId 管理员ID
+     */
+    void adminResetPassword(String sno, String newPassword, String adminId);
 } 

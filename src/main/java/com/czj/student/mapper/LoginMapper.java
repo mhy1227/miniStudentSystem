@@ -28,4 +28,10 @@ public interface LoginMapper {
      */
     @Update("UPDATE student SET last_login_time = NOW() WHERE sno = #{sno}")
     int updateLastLoginTime(@Param("sno") String sno);
+
+    /**
+     * 更新密码
+     */
+    @Update("UPDATE student SET pwd = #{newPassword} WHERE sno = #{sno}")
+    int updatePassword(@Param("sno") String sno, @Param("newPassword") String newPassword);
 } 

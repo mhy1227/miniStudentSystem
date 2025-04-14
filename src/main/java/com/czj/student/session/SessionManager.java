@@ -134,4 +134,29 @@ public class SessionManager {
     public void cleanExpiredSessions() {
         sessionPool.maintain();  // 使用SessionPool的maintain方法进行维护
     }
+    
+    /**
+     * 强制登录（用于异地登录验证通过后）
+     * @param sno 学号
+     * @param sessionId 会话ID
+     * @param ip 登录IP
+     * @return 是否成功
+     */
+    public boolean forceLogin(String sno, String sessionId, String ip) {
+        try {
+            // 1. 先使旧会话失效
+            sessionPool.invalidateSession(sno);
+                            
+            // 2. 创建新会话
+            UserSession session = sessionPool.borrowSession(sno, sessionId);
+            session.setIp(ip);
+            session.setLoginTime(new Date());
+            
+            logger.info("用户[{}]从IP[{}]强制登录成功", sno, ip);
+            return true;
+        } catch (Exception e) {
+            logger.error("用户[{}]从IP[{}]强制登录失败", sno, ip, e);
+            return false;
+        }
+    }
 } 
